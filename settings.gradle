@@ -1,0 +1,2 @@
+rootProject.name='ProjectManageV1.1'
+include ':app'

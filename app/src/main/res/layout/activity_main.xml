@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/l_full"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#8A8080">
+
+
+    <LinearLayout
+        android:id="@+id/l_body"
+        android:layout_width="326dp"
+        android:layout_height="match_parent"
+        android:background="#FFFFFF"
+        android:orientation="vertical">
+
+
+        <LinearLayout
+            android:id="@+id/l_top"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <ImageView
+                android:layout_margin="10dp"
+                android:id="@+id/img_avt"
+                android:layout_width="match_parent"
+                android:layout_height="205dp"
+                app:srcCompat="@drawable/default_avatar" />
+
+            <TextView
+                android:id="@+id/t_avtID"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="15dp"
+                android:text="ID: "
+                android:textAlignment="center" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <View
+                android:id="@+id/view2"
+                android:layout_width="match_parent"
+                android:background="#67646E"
+                android:layout_height="5dp" />
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:id="@+id/l_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:paddingLeft="25dp">
+
+            <TextView
+                android:id="@+id/tv_dn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:text="Đăng nhập"
+                android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/tv_dk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:text="Đăng ký"
+                android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/tv_hs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:text="Hồ sơ"
+                android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/tv_cd"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:text="Cài đặt"
+                android:textSize="25dp" />
+
+            <TextView
+                android:id="@+id/tv_tg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:text="Trợ giúp"
+                android:textSize="25dp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

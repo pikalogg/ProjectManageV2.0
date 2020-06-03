@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "108000291465",
+    "firebase_url": "https://project-manage-54e1c.firebaseio.com",
+    "project_id": "project-manage-54e1c",
+    "storage_bucket": "project-manage-54e1c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:108000291465:android:a6e1e83f3dab7953bbb458",
+        "android_client_info": {
+          "package_name": "com.pikalong.projectmanagev11"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "108000291465-lgob62f5bkbha7jga9ed39he36phq46l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pikalong.projectmanagev11",
+            "certificate_hash": "8ffa1923d6c87aae1cc86566bf4b2e8dc1efbbf0"
+          }
+        },
+        {
+          "client_id": "108000291465-ijavul1ggbdvlntr2eslqg53eh0takn3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdabjz_m2q1JGcAo0dhMFJadoAAmlvpVM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "108000291465-ijavul1ggbdvlntr2eslqg53eh0takn3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

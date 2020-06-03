@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.pikalong.projectmanagev11.ProjectActivity">
+    <item
+        android:id="@+id/action_file"
+        android:orderInCategory="100"
+        android:title="Tệp đính kèm"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_delete"
+        android:orderInCategory="100"
+        android:title="Hủy dự án (xóa)"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_return"
+        android:orderInCategory="100"
+        android:title="Kết thúc dự án"
+        app:showAsAction="never" />
+</menu>

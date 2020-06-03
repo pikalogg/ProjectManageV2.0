@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/item_pi1" android:title="Hồ sơ cá nhân cá nhân" android:icon="@drawable/ic_account_box_black_24dp"/>
+    <item android:id="@+id/item_pi3" android:title="Chia sẻ ID" android:icon="@drawable/ic_share_black_24dp"/>
+    <item android:id="@+id/item_pi2" android:title="Cài đặt" android:icon="@drawable/ic_settings_applications_black_24dp"/>
+
+    <item android:id="@+id/item_pi4" android:title="Trợ giúp" android:icon="@drawable/ic_help_black_24dp"/>
+</menu>
