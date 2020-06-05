@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#F4F4F4"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/imgCover"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/defause_bgr" />
+
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <androidx.cardview.widget.CardView
+                    android:layout_gravity="center"
+                    android:layout_marginTop="100dp"
+                    app:cardCornerRadius="75dp"
+                    android:layout_width="150dp"
+                    android:layout_height="150dp">
+
+                    <ImageView
+                        android:id="@+id/imgAva"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/default_avatar" />
+
+                </androidx.cardview.widget.CardView>
+
+                <TextView
+                    android:id="@+id/tvName"
+                    android:layout_margin="10dp"
+                    android:textStyle="bold"
+                    android:textSize="20sp"
+                    android:textAlignment="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </LinearLayout>
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="250dp">
+
+                <androidx.cardview.widget.CardView
+                    android:outlineAmbientShadowColor="@color/none"
+                    android:outlineSpotShadowColor="@color/none"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="50dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="0dp"
+                    app:cardCornerRadius="5dp"
+                    app:cardBackgroundColor="#80C4C8CC"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp">
+                    <ImageView
+                        android:id="@+id/btnChangeCover"
+                        android:background="@color/none"
+                        android:layout_gravity="center"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+                </androidx.cardview.widget.CardView>
+                <androidx.cardview.widget.CardView
+                    android:outlineAmbientShadowColor="@color/none"
+                    android:outlineSpotShadowColor="@color/none"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginBottom="0dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="130dp"
+                    app:cardCornerRadius="20dp"
+                    android:layout_width="40dp"
+                    app:cardBackgroundColor="#80C4C8CC"
+                    android:layout_height="40dp">
+                    <ImageView
+                        android:id="@+id/btnChangeAva"
+                        android:background="@color/none"
+                        android:layout_gravity="center"
+                        android:layout_width="25dp"
+                        android:layout_height="25dp"
+                        app:srcCompat="@drawable/ic_edit_black_24dp" />
+
+                </androidx.cardview.widget.CardView>
+            </RelativeLayout>
+        </FrameLayout>
+
+
+        <LinearLayout
+            android:layout_margin="20dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="Email:"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/tvEmail"
+                    android:textAlignment="center"
+                    android:textSize="18sp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+                <View
+                    android:layout_margin="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorGrey2"/>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:text="Tên đăng nhập:"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+            <EditText
+                android:id="@+id/edName"
+                android:gravity="center"
+                android:background="@color/none"
+                android:layout_width="match_parent"
+                android:hint="Nguyễn Văn A"
+                android:layout_height="wrap_content"/>
+            <View
+                android:layout_margin="5dp"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/colorGrey2"/>
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:weightSum="2"
+                android:layout_height="wrap_content">
+                <LinearLayout
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ngày sinh:"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <EditText
+                        android:id="@+id/edBirthday"
+                        android:gravity="center"
+                        android:background="@color/none"
+                        android:layout_width="match_parent"
+                        android:hint="22/02/1999"
+                        android:layout_height="wrap_content"/>
+                    <View
+                        android:layout_margin="5dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/colorGrey2"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Giới tính:"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:weightSum="6"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+                        <TextView
+                            android:id="@+id/tvGender"
+                            android:text="Nam"
+                            android:textAlignment="center"
+                            android:textSize="18sp"
+                            android:layout_width="match_parent"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"/>
+                        <ImageButton
+                            android:id="@+id/btnChangeGender"
+                            android:layout_gravity="center"
+                            android:src="@drawable/ic_next_black_24dp"
+                            android:layout_width="match_parent"
+                            android:layout_weight="5"
+                            android:background="@color/none"
+                            android:layout_height="18dp"/>
+                    </LinearLayout>
+                    <View
+                        android:layout_margin="5dp"
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/colorGrey2"/>
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Số điện thoại:"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+                <EditText
+                    android:id="@+id/edPhone"
+                    android:gravity="center"
+                    android:background="@color/none"
+                    android:layout_width="match_parent"
+                    android:hint="09xxxxxxxxx"
+                    android:inputType="phone"
+                    android:layout_height="wrap_content"/>
+                <View
+                    android:layout_margin="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorGrey2"/>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_marginTop="15dp"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <LinearLayout
+                    android:layout_gravity="center"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:textAlignment="center"
+                        android:gravity="center"
+                        android:text="Thay đổi mật khẩu:"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"/>
+                    <LinearLayout
+                        android:gravity="center"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <Button
+                            android:layout_marginLeft="35dp"
+                            android:id="@+id/btnChangePass"
+                            android:background="#4FADF9"
+                            android:layout_width="160dp"
+                            android:layout_height="38dp"
+                            android:textColor="@color/colorWhite"
+                            android:text="Thay đổi"/>
+                    </LinearLayout>
+                </LinearLayout>
+                <View
+                    android:layout_margin="5dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/colorGrey2"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

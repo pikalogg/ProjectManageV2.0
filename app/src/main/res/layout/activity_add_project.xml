@@ -36,7 +36,7 @@
                         android:text="Tên dự án" />
 
                     <EditText
-                        android:id="@+id/ed_name"
+                        android:id="@+id/edNamePro"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="10"
@@ -66,7 +66,7 @@
                         android:text="Mô tả dự án" />
 
                     <EditText
-                        android:id="@+id/ed_des"
+                        android:id="@+id/edDesPro"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ems="10"
@@ -105,12 +105,14 @@
                         android:layout_width="match_parent"
                         android:layout_height="70dp">
                         <GridLayout
+                            android:id="@+id/glAddFile"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:columnCount="5"
                             android:background="#ffffff">
                         </GridLayout>
                         <TextView
+                            android:id="@+id/tvAddFile"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:textAlignment="center"
@@ -134,133 +136,34 @@
                         android:text="Thành viên" />
 
 
-                    <GridLayout
-                        android:columnCount="2"
-                        android:alignmentMode="alignMargins"
-                        android:layout_weight="8"
+                    <RelativeLayout
+                        android:id="@+id/rlAddMem"
                         android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:padding="4dp">
-                        <LinearLayout
-                            android:layout_margin="3dp"
-                            android:layout_marginRight="10dp"
-                            android:background="@drawable/rounded_edge">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_gravity="center"
-                                android:layout_marginRight="5dp"
-                                android:text="volocanh"/>
+                        android:background="@color/colorWhite"
+                        android:layout_height="80dp">
+                        <GridView
+                            android:id="@+id/gvAddMem"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="40dp"
+                            android:numColumns="3"/>
 
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                app:srcCompat="@drawable/circled_x" />
-
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_margin="3dp"
-                            android:layout_marginRight="10dp"
-                            android:background="@drawable/rounded_edge">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_gravity="center"
-                                android:layout_marginRight="5dp"
-                                android:text="vutrunganh"/>
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                app:srcCompat="@drawable/circled_x" />
-
-                        </LinearLayout>
-                        <LinearLayout
-                            android:layout_margin="3dp"
-                            android:layout_marginRight="10dp"
-                            android:background="@drawable/rounded_edge">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_gravity="center"
-                                android:layout_marginRight="5dp"
-                                android:text="vuthingocle"/>
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                app:srcCompat="@drawable/circled_x" />
-
-                        </LinearLayout>
-                    </GridLayout>
-
-
-                    <View
-                        android:layout_width="match_parent"
-                        android:background="@color/colorPrimaryDark"
-                        android:layout_height="0.3dp" />
-                </LinearLayout>
-
-                <LinearLayout
-                    android:id="@+id/l_truongnhom"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/l_tv"
-                    android:layout_marginTop="10dp"
-                    android:orientation="vertical">
-
-                    <TextView
+                    </RelativeLayout>
+                    <ListView
+                        android:id="@+id/lvAddMem"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="3dp"
-                        android:text="Nhóm trưởng" />
-
-                    <GridLayout
-                        android:columnCount="2"
-                        android:alignmentMode="alignMargins"
-                        android:layout_weight="8"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:padding="4dp">
-                        <LinearLayout
-                            android:layout_margin="3dp"
-                            android:layout_marginRight="10dp"
-                            android:background="@drawable/rounded_edge">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_gravity="center"
-                                android:layout_marginRight="5dp"
-                                android:text="nguyenduclong"/>
-
-                            <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:layout_weight="1"
-                                app:srcCompat="@drawable/circled_x" />
-
-                        </LinearLayout>
-                    </GridLayout>
+                        android:minHeight="40dp"/>
 
                     <View
                         android:layout_width="match_parent"
                         android:background="@color/colorPrimaryDark"
                         android:layout_height="0.3dp" />
+
+
                 </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="0.3dp"
-                    android:layout_below="@id/l_truongnhom"
-                    android:layout_marginBottom="10dp"
-                    android:background="#757575" />
+
             </RelativeLayout>
         </ScrollView>
         <LinearLayout

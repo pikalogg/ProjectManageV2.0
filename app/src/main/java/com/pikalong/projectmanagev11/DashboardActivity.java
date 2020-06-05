@@ -9,12 +9,14 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -33,12 +35,14 @@ import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
 import com.pikalong.projectmanagev11.model.Project;
 import com.pikalong.projectmanagev11.model.User;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.pikalong.projectmanagev11.R.string.open;
 
 public class DashboardActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
     ActionBar actionBar;
     TextView btn_dang, btn_da;
     ListView listView;
@@ -58,6 +62,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
     FirebaseAuth firebaseAuth;
     FirebaseUser firebaseUser;
+    User user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,6 +106,22 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             startActivity(intent);
             finish();
         }
+        user = null;
+
+        String uid = firebaseUser.getUid();
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+        Query query = reference.child(uid);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                user = dataSnapshot.getValue(User.class);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
     private void addEvent(){
 
@@ -132,10 +153,13 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             }
         });
 
+
+        /////////////////////////
+
     }
 
     private  void addData(){
-//        projects_dang = new ArrayList<>();
+        projects_dang = new ArrayList<>();
 //        projects_dang.add(new Project("Dự án 1", "chả cần làm gì"));
 //        projects_dang.add(new Project("Dự án 2", "chả cần làm gì"));
 //        projects_dang.add(new Project("Dự án 3", "chả cần làm gì"));
@@ -148,13 +172,13 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 //        projects_da.add(new Project("Dự án xong 1", "chả cần làm gì"));
 //        projects_da.add(new Project("Dự án xong 2", "chả cần làm gì"));
 //
-//        projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
+        projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
 //        projectAdapter_da = new ProjectAdapter(projects_da , getApplicationContext());
-//        listView.setAdapter(projectAdapter_dang);
-//
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        listView.setAdapter(projectAdapter_dang);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 //                Intent intent = new Intent(DashboardActivity.this, ProjectActivity.class);
 //                if(inDang){
 //                    intent.putExtra("namePro", projects_dang.get(i).getTitle());
@@ -162,9 +186,10 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 //                    intent.putExtra("namePro", projects_da.get(i).getTitle());
 //                }
 //                startActivity(intent);
-////                finish();
-//            }
-//        });
+//                finish();
+            }
+        });
+        projects_dang.add(new Project("Dsad","ádasd", "đâs", "đâs","đasa","đâs","đâs","đá",1));
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -190,17 +215,46 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         drawerLayout.closeDrawer(GravityCompat.START);
         int id = item.getItemId();
+        Intent intent;
         switch (id){
-            case R.id.item_pi1:
+            case R.id.drawerProfile:
+                intent = new Intent(DashboardActivity.this, UpdateProfileActivyty.class);
+                startActivity(intent);
+//                finish();
+                break;
+
+
+            case R.id.drawerShareId:
+                Intent shareIdIntent = new Intent(Intent.ACTION_SEND);
+                shareIdIntent.setType("text/plain");
+                String shareBody = user.getUid();
+
+                shareIdIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
+//                shareIdIntent.putExtra(Intent.EXTRA_SUBJECT, shareBody);
+
+                startActivity(Intent.createChooser(shareIdIntent, "Chia sẻ ID"));
+                break;
+            case R.id.drawerSetting:
+                intent = new Intent(DashboardActivity.this, SettingActivity.class);
+                startActivity(intent);
+                break;
+
+            case R.id.drawerHelp:
+                intent = new Intent(DashboardActivity.this, HelpActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.drawerSigout:
                 firebaseAuth.signOut();
-                Intent intent = new Intent(DashboardActivity.this, LoginActivity.class);
+                intent = new Intent(DashboardActivity.this, LoginActivity.class);
                 startActivity(intent);
                 finish();
                 break;
-
             default:
                 break;
         }
         return false;
     }
+    
+
+    
 }

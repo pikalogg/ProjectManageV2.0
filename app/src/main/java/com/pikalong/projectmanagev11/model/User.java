@@ -5,14 +5,19 @@ package com.pikalong.projectmanagev11.model;
 public class User {
     private String email;
     private String name;
+    private String birthday;
+    private String gender;
     private String uid; //id của người dùng do google Authentication tạo
     private String phone;
     private String image; //URL của ảnh đại diện người dùng
     private String cover; //URL của ảnh bìa
 
-    public User(String email, String name, String uid, String phone, String image, String cover, String onlineStatus) {
+
+    public User(String email, String name, String birthday, String gender, String uid, String phone, String image, String cover) {
         this.email = email;
         this.name = name;
+        this.birthday = birthday;
+        this.gender = gender;
         this.uid = uid;
         this.phone = phone;
         this.image = image;
@@ -20,6 +25,22 @@ public class User {
     }
 
     public User() {
+    }
+
+    public String getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(String birthday) {
+        this.birthday = birthday;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getEmail() {

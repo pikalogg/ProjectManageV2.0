@@ -142,9 +142,11 @@ public class RegisterActivity extends AppCompatActivity {
                             HashMap<String, Object> hashMap = new HashMap<>();
                             hashMap.put("email", email);
                             hashMap.put("uid", uid);
-                            hashMap.put("name", name); //lấy sau
+                            hashMap.put("name", name);
                             hashMap.put("typingTo", "noOne");
-                            hashMap.put("phone", phone); //lấy sau
+                            hashMap.put("phone", phone);
+                            hashMap.put("birthday", ""); //lấy sau
+                            hashMap.put("gender", "Nam");//lấy sau
                             hashMap.put("image", ""); //lấy sau
                             hashMap.put("cover", "");//lấy sau
 
