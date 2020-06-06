@@ -6,6 +6,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -14,6 +15,7 @@ import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -21,6 +23,12 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,10 +37,17 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.pikalong.projectmanagev11.model.User;
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
+import java.util.HashMap;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class UpdateProfileActivyty extends AppCompatActivity {
     private static final int PICK_PHOTO_FOR_AVATAR = 1;
@@ -45,6 +60,16 @@ public class UpdateProfileActivyty extends AppCompatActivity {
     EditText edName, edBirthday, edPhone ;
     TextView tvName, tvGender, tvEmail;
     //////////////
+    Uri imgUriAva, imgUriCov;
+
+    User mUser;
+    SweetAlertDialog sweetAlertDialog;
+
+
+    FirebaseUser user;
+    StorageReference storageReference;
+    DatabaseReference databaseReference;
+    UploadTask uploadTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +104,11 @@ public class UpdateProfileActivyty extends AppCompatActivity {
         tvEmail = findViewById(R.id.tvEmail);
         tvName = findViewById(R.id.tvName);
         tvGender = findViewById(R.id.tvGender);
+
+        sweetAlertDialog = new SweetAlertDialog(this);
+
+        storageReference = FirebaseStorage.getInstance().getReference("Uploads");
+        databaseReference = FirebaseDatabase.getInstance().getReference("Users");
     }
 
 
@@ -106,9 +136,9 @@ public class UpdateProfileActivyty extends AppCompatActivity {
                 final AlertDialog.Builder alert = new AlertDialog.Builder(UpdateProfileActivyty.this);
                 View mView = getLayoutInflater().inflate(R.layout.dialog_change_pass, null);
 
-                EditText edOldPass = mView.findViewById(R.id.edOldPass);
-                EditText edNewPass = mView.findViewById(R.id.edNewPass);
-                EditText edReNewPass = mView.findViewById(R.id.edReNewPass);
+                final EditText edOldPass = mView.findViewById(R.id.edOldPass);
+                final EditText edNewPass = mView.findViewById(R.id.edNewPass);
+                final EditText edReNewPass = mView.findViewById(R.id.edReNewPass);
                 Button btnOk = mView.findViewById(R.id.btnOk);
                 Button btnCancel = mView.findViewById(R.id.btnCancel);
 
@@ -128,6 +158,16 @@ public class UpdateProfileActivyty extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
 
+                        if(edNewPass.getText().toString().length() < 6){
+                            edNewPass.setError("Mật khẩu quá ngắn");
+                            edNewPass.setFocusable(true);
+                        }
+                        else if(edNewPass.getText().toString().equals(edReNewPass.getText().toString())){
+                            updatePass(edOldPass.getText().toString(), edNewPass.getText().toString());
+                        }
+                        else {
+                            edReNewPass.setError("Không trùng khớp");
+                        }
                     }
                 });
 
@@ -151,23 +191,35 @@ public class UpdateProfileActivyty extends AppCompatActivity {
     }
 
     private void addData() {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = firebaseUser.getUid();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
-        Query query = reference.child(uid);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = user.getUid();
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(uid);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                tvName.setText(user.getName());
-                tvEmail.setText(user.getEmail());
-                edName.setText(user.getName());
-                if(!user.getBirthday().equals("")){
-                    edBirthday.setText(user.getBirthday());
+                mUser = dataSnapshot.getValue(User.class);
+                tvName.setText(mUser.getName());
+                tvEmail.setText(mUser.getEmail());
+                edName.setText(mUser.getName());
+                if(!mUser.getBirthday().equals("")){
+                    edBirthday.setText(mUser.getBirthday());
                 }
-                tvGender.setText(user.getGender());
-                edPhone.setText(user.getPhone());
+                tvGender.setText(mUser.getGender());
+                edPhone.setText(mUser.getPhone());
 
+                if(mUser.getImage().equals("")){
+                    Picasso.get().load(R.drawable.default_avatar).into(imgAva);
+                }
+                else {
+                    Picasso.get().load(mUser.getImage()).into(imgAva);
+                }
+
+                if(mUser.getCover().equals("")){
+                    Picasso.get().load(R.drawable.defause_bgr).into(imgCover);
+                }
+                else {
+                    Picasso.get().load(mUser.getCover()).into(imgCover);
+                }
             }
 
             @Override
@@ -195,13 +247,16 @@ public class UpdateProfileActivyty extends AppCompatActivity {
                 return true;
             case R.id.itemSave:
                 // luu thong tin lai
-
+                SaveProfile();
 
             default:break;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+
+
     ////////////// choie img
     public void pickImageAvata() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -223,9 +278,9 @@ public class UpdateProfileActivyty extends AppCompatActivity {
 
                 return;
             }
-            Uri imgData = data.getData();
+            imgUriAva = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),imgData);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),imgUriAva);
                 imgAva.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -238,9 +293,9 @@ public class UpdateProfileActivyty extends AppCompatActivity {
                 return;
             }
             //Now you can do whatever you want with your inpustream, save it as file, upload to a server, decode a bitmap...
-            Uri imgData = data.getData();
+            imgUriCov = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),imgData);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(),imgUriCov);
                 imgCover.setImageBitmap(bitmap);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -248,5 +303,173 @@ public class UpdateProfileActivyty extends AppCompatActivity {
 
 
         }
+    }
+    //////////////////////////
+    private String getFileExtension(Uri uri){
+        ContentResolver contentResolver = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(contentResolver.getType(uri));
+    }
+
+    private void SaveProfile() {
+
+        if( edBirthday.getText().toString().equals("")){
+            edBirthday.setError("Vui lòng điền ngày sinh");
+            edBirthday.setFocusable(true);
+            return;
+        }
+        if (!edBirthday.getText().toString().matches("([0-9]{2})/([0-9]{2})/([0-9]{4})")){
+            edBirthday.setError("Sai định dạng");
+            edBirthday.setFocusable(true);
+            return;
+        }
+
+        sweetAlertDialog.setTitleText("Hãy chờ");
+        sweetAlertDialog.setContentText("Thay đổi đang được lưu.....");
+        sweetAlertDialog.show();
+
+
+        ///up text
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("email", mUser.getEmail());
+        hashMap.put("uid", mUser.getUid());
+        hashMap.put("name", edName.getText().toString());
+        hashMap.put("typingTo", "noOne");
+        hashMap.put("phone", edPhone.getText().toString());
+        hashMap.put("birthday", edBirthday.getText().toString());
+        hashMap.put("projects", mUser.getProjects());
+        hashMap.put("gender", tvGender.getText().toString());
+        hashMap.put("image", mUser.getImage()); //lấy sau
+        hashMap.put("cover", mUser.getCover());//lấy sau
+
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference reference = firebaseDatabase.getReference("Users");
+        reference.child(mUser.getUid()).setValue(hashMap);
+
+        // up img
+        upLoadImage(imgUriAva, 1);
+        imgUriAva = null;
+        upLoadImage(imgUriCov, 2);
+        imgUriCov = null;
+
+        sweetAlertDialog.dismiss();
+        Toast.makeText(this, "Thay đổi đã được lưu lại", Toast.LENGTH_LONG).show();
+    }
+
+    private void upLoadImage(final Uri uri, final int stt){
+        if(uri != null){
+            final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(uri));
+            uploadTask = (UploadTask) fileReference.putFile(uri)
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                final Uri downloadUrl = uri;
+                                HashMap<String, Object> hashMap = new HashMap<>();
+                                hashMap.put("email", mUser.getEmail());
+                                hashMap.put("uid", mUser.getUid());
+                                hashMap.put("name", mUser.getName());
+                                hashMap.put("typingTo", "noOne");
+                                hashMap.put("phone", mUser.getPhone());
+                                hashMap.put("birthday", mUser.getBirthday());
+                                hashMap.put("projects", mUser.getProjects());
+                                hashMap.put("gender", mUser.getGender());
+                                hashMap.put("image", mUser.getImage());
+                                hashMap.put("cover", mUser.getCover());
+
+                                if(stt == 1){
+                                    hashMap.put("image", downloadUrl.toString());
+                                } else if (stt == 2){
+                                    hashMap.put("cover", downloadUrl.toString());
+                                }
+
+                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                DatabaseReference reference = firebaseDatabase.getReference("Users");
+                                reference.child(mUser.getUid()).setValue(hashMap);
+
+
+                                // reset muser
+                                reference.child(mUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        mUser = dataSnapshot.getValue(User.class);
+                                    }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+        }
+    }
+
+    private void updatePass(String currentpass, final String newpass) {
+        sweetAlertDialog.setTitleText("Updating password");
+        sweetAlertDialog.setContentText("Please wait.....");
+        sweetAlertDialog.show();
+        final String email = user.getEmail();
+        AuthCredential credential = EmailAuthProvider.getCredential(email,currentpass);
+
+        user.reauthenticate(credential).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if(task.isSuccessful())
+                {
+                    sweetAlertDialog.dismiss();
+                    user.updatePassword(newpass).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            if(task.isSuccessful())
+                            {
+                                new SweetAlertDialog(UpdateProfileActivyty.this, SweetAlertDialog.SUCCESS_TYPE)
+                                        .setTitleText("Mật khẩu đã được thay đổi")
+                                        .setConfirmButton("Ok", new SweetAlertDialog.OnSweetClickListener() {
+                                            @Override
+                                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                sweetAlertDialog.dismiss();
+                                                finish();
+                                            }
+                                        })
+                                        .show();
+                            }
+                            else
+                            {
+                                new SweetAlertDialog(UpdateProfileActivyty.this, SweetAlertDialog.ERROR_TYPE)
+                                        .setTitleText("Thay đổi mật khẩu thất bại")
+                                        .setConfirmButton("Ok", new SweetAlertDialog.OnSweetClickListener() {
+                                            @Override
+                                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                sweetAlertDialog.dismissWithAnimation();
+                                            }
+                                        })
+                                        .show();
+                            }
+                        }
+                    });
+                }
+                else
+                {
+                    sweetAlertDialog.dismiss();
+                    new SweetAlertDialog(UpdateProfileActivyty.this, SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("Mật khẩu cũ không khớp")
+                            .setConfirmButton("Ok", new SweetAlertDialog.OnSweetClickListener() {
+                                @Override
+                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                    sweetAlertDialog.dismissWithAnimation();
+                                }
+                            })
+                            .show();
+                }
+            }
+        });
     }
 }

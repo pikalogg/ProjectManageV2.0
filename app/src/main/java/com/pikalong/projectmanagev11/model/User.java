@@ -7,24 +7,31 @@ public class User {
     private String name;
     private String birthday;
     private String gender;
+    private String projects;
     private String uid; //id của người dùng do google Authentication tạo
     private String phone;
     private String image; //URL của ảnh đại diện người dùng
     private String cover; //URL của ảnh bìa
 
 
-    public User(String email, String name, String birthday, String gender, String uid, String phone, String image, String cover) {
+    public User(String email, String name, String birthday, String gender, String projects, String uid, String phone, String image, String cover) {
         this.email = email;
         this.name = name;
         this.birthday = birthday;
         this.gender = gender;
+        this.projects = projects;
         this.uid = uid;
         this.phone = phone;
         this.image = image;
         this.cover = cover;
     }
 
-    public User() {
+    public String getProjects() {
+        return projects;
+    }
+
+    public void setProjects(String projects) {
+        this.projects = projects;
     }
 
     public String getBirthday() {

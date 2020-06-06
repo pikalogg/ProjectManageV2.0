@@ -17,8 +17,7 @@
                 android:id="@+id/imgCover"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/defause_bgr" />
+                android:scaleType="centerCrop" />
 
 
             <LinearLayout
@@ -35,8 +34,7 @@
                     <ImageView
                         android:id="@+id/imgAva"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:src="@drawable/default_avatar" />
+                        android:layout_height="match_parent" />
 
                 </androidx.cardview.widget.CardView>
 

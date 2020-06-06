@@ -21,6 +21,7 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -31,6 +32,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.pikalong.projectmanagev11.adapter.MemberBoxAdapter;
 import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
 import com.pikalong.projectmanagev11.model.Project;
 import com.pikalong.projectmanagev11.model.User;
@@ -168,13 +170,15 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 //        projects_dang.add(new Project("Dự án 6", "chả cần làm gì"));
 //        projects_dang.add(new Project("Dự án 7", "chả cần làm gì"));
 //
-//        projects_da = new ArrayList<>();
+        projects_da = new ArrayList<>();
 //        projects_da.add(new Project("Dự án xong 1", "chả cần làm gì"));
 //        projects_da.add(new Project("Dự án xong 2", "chả cần làm gì"));
 //
         projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
-//        projectAdapter_da = new ProjectAdapter(projects_da , getApplicationContext());
+        projectAdapter_da = new ProjectAdapter(projects_da , getApplicationContext());
+
         listView.setAdapter(projectAdapter_dang);
+
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -187,6 +191,10 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 //                }
 //                startActivity(intent);
 //                finish();
+                projects_dang.remove(i);
+                projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
+                listView.setAdapter(projectAdapter_dang);
+                Toast.makeText(DashboardActivity.this, "so" + i, Toast.LENGTH_LONG).show();
             }
         });
         projects_dang.add(new Project("Dsad","ádasd", "đâs", "đâs","đasa","đâs","đâs","đá",1));

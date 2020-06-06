@@ -14,6 +14,7 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
@@ -32,6 +33,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.pikalong.projectmanagev11.adapter.MemberBoxAdapter;
+import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
+import com.pikalong.projectmanagev11.model.Project;
 import com.pikalong.projectmanagev11.model.User;
 
 import java.util.ArrayList;
@@ -40,18 +43,21 @@ import java.util.List;
 public class AddProjectActivity extends AppCompatActivity {
     ActionBar actionBar;
 
-    GridView gvAddMem;
-    RelativeLayout rlAddMem;
+    ListView lvAddMem;
+    LinearLayout llAddMem;
     List<String> members;
+    List<String> memberUid;
     MemberBoxAdapter memberBoxAdapter;
 
     boolean checkMem = false;
+    String tmpUid;
     TextView tvAddMem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_project);
+
         addControl();
         addEvent();
         addData();
@@ -63,14 +69,15 @@ public class AddProjectActivity extends AppCompatActivity {
         actionBar.setDisplayHomeAsUpEnabled(true);
 
 
-        gvAddMem = findViewById(R.id.gvAddMem);
-        rlAddMem =findViewById(R.id.rlAddMem);
-//        tvAddMem = findViewById(R.id.tvAddMem);
+        lvAddMem = findViewById(R.id.lvAddMem);
+        llAddMem =findViewById(R.id.llAddMem);
+        memberUid = new ArrayList<>();
+        members = new ArrayList<>();
 
 
     }
     private void addEvent(){
-        rlAddMem.setOnClickListener(new View.OnClickListener() {
+        llAddMem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 final AlertDialog.Builder alert = new AlertDialog.Builder(AddProjectActivity.this);
@@ -90,7 +97,7 @@ public class AddProjectActivity extends AppCompatActivity {
                 btnCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        members.add("pika");
+
                         alertDialog.dismiss();
                     }
                 });
@@ -99,7 +106,8 @@ public class AddProjectActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         tvMemName.setText("");
-                        String uid = edMemId.getText().toString();
+                        final String uid = edMemId.getText().toString();
+                        tmpUid = uid;
                         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
                         Query query = reference.child(uid);
                         query.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -129,11 +137,21 @@ public class AddProjectActivity extends AppCompatActivity {
                     @Override
                     public void onClick(View view) {
                         if(checkMem){
-                            members.add(tvMemName.getText().toString());
-                            alertDialog.dismiss();
+                            if(memberUid.indexOf(tmpUid) < 0){
+                                members.add(tvMemName.getText().toString());
+                                memberBoxAdapter = new MemberBoxAdapter(members, getApplicationContext());
+                                lvAddMem.setAdapter(memberBoxAdapter);
+
+                                memberUid.add(new String(tmpUid));
+                                alertDialog.dismiss();
+                            }
+                            else{
+                                Toast.makeText(AddProjectActivity.this, "Thành viên đã được thêm trước đó", Toast.LENGTH_LONG).show();
+                                edMemId.setFocusable(true);
+                            }
                         }
                         else {
-                            edMemId.setError("Chưa chọn thành viên");
+                            Toast.makeText(AddProjectActivity.this, "Chưa chọn thành viên", Toast.LENGTH_LONG).show();
                             edMemId.setFocusable(true);
                         }
                     }
@@ -145,13 +163,19 @@ public class AddProjectActivity extends AppCompatActivity {
     }
 
     private  void addData(){
-        members = new ArrayList<>();
-//        members.add(new String("pika"));
         memberBoxAdapter = new MemberBoxAdapter(members, getApplicationContext());
-//        gvAddMem.setAdapter(memberBoxAdapter);
 
-        ListView lvAddMem = findViewById(R.id.lvAddMem);
         lvAddMem.setAdapter(memberBoxAdapter);
+
+        lvAddMem.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                members.remove(i);
+                memberUid.remove(i);
+                memberBoxAdapter = new MemberBoxAdapter(members, getApplicationContext());
+                lvAddMem.setAdapter(memberBoxAdapter);
+            }
+        });
 
 
     }
