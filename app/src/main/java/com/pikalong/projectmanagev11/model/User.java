@@ -26,12 +26,23 @@ public class User {
         this.cover = cover;
     }
 
-    public String getProjects() {
-        return projects;
+    public User() {
     }
 
-    public void setProjects(String projects) {
-        this.projects = projects;
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getBirthday() {
@@ -50,20 +61,12 @@ public class User {
         this.gender = gender;
     }
 
-    public String getEmail() {
-        return email;
+    public String getProjects() {
+        return projects;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
+    public void setProjects(String projects) {
+        this.projects = projects;
     }
 
     public String getUid() {

@@ -64,7 +64,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
     FirebaseAuth firebaseAuth;
     FirebaseUser firebaseUser;
-    User user;
+    User mUser;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,17 +108,15 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             startActivity(intent);
             finish();
         }
-        user = null;
+        mUser = null;
 
         String uid = firebaseUser.getUid();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
-        Query query = reference.child(uid);
-        query.addListenerForSingleValueEvent(new ValueEventListener() {
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(uid);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                user = dataSnapshot.getValue(User.class);
+                mUser = dataSnapshot.getValue(User.class);
             }
-
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
@@ -235,7 +233,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             case R.id.drawerShareId:
                 Intent shareIdIntent = new Intent(Intent.ACTION_SEND);
                 shareIdIntent.setType("text/plain");
-                String shareBody = user.getUid();
+                String shareBody = firebaseUser.getUid();
 
                 shareIdIntent.putExtra(Intent.EXTRA_TEXT, shareBody);
 //                shareIdIntent.putExtra(Intent.EXTRA_SUBJECT, shareBody);
@@ -262,7 +260,4 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         }
         return false;
     }
-    
-
-    
 }

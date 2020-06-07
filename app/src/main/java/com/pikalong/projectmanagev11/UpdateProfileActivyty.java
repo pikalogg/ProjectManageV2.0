@@ -8,10 +8,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -324,27 +326,22 @@ public class UpdateProfileActivyty extends AppCompatActivity {
             return;
         }
 
-        sweetAlertDialog.setTitleText("Hãy chờ");
-        sweetAlertDialog.setContentText("Thay đổi đang được lưu.....");
-        sweetAlertDialog.show();
+//        sweetAlertDialog.setTitleText("Hãy chờ");
+//        sweetAlertDialog.setContentText("Thay đổi đang được lưu.....");
+//        sweetAlertDialog.show();
 
 
         ///up text
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("email", mUser.getEmail());
-        hashMap.put("uid", mUser.getUid());
         hashMap.put("name", edName.getText().toString());
         hashMap.put("typingTo", "noOne");
         hashMap.put("phone", edPhone.getText().toString());
         hashMap.put("birthday", edBirthday.getText().toString());
-        hashMap.put("projects", mUser.getProjects());
         hashMap.put("gender", tvGender.getText().toString());
-        hashMap.put("image", mUser.getImage()); //lấy sau
-        hashMap.put("cover", mUser.getCover());//lấy sau
 
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         DatabaseReference reference = firebaseDatabase.getReference("Users");
-        reference.child(mUser.getUid()).setValue(hashMap);
+        reference.child(mUser.getUid()).updateChildren(hashMap);
 
         // up img
         upLoadImage(imgUriAva, 1);
@@ -352,7 +349,7 @@ public class UpdateProfileActivyty extends AppCompatActivity {
         upLoadImage(imgUriCov, 2);
         imgUriCov = null;
 
-        sweetAlertDialog.dismiss();
+//        sweetAlertDialog.dismiss();
         Toast.makeText(this, "Thay đổi đã được lưu lại", Toast.LENGTH_LONG).show();
     }
 
@@ -363,6 +360,7 @@ public class UpdateProfileActivyty extends AppCompatActivity {
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
+
                     }
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
@@ -372,17 +370,6 @@ public class UpdateProfileActivyty extends AppCompatActivity {
                             public void onSuccess(Uri uri) {
                                 final Uri downloadUrl = uri;
                                 HashMap<String, Object> hashMap = new HashMap<>();
-                                hashMap.put("email", mUser.getEmail());
-                                hashMap.put("uid", mUser.getUid());
-                                hashMap.put("name", mUser.getName());
-                                hashMap.put("typingTo", "noOne");
-                                hashMap.put("phone", mUser.getPhone());
-                                hashMap.put("birthday", mUser.getBirthday());
-                                hashMap.put("projects", mUser.getProjects());
-                                hashMap.put("gender", mUser.getGender());
-                                hashMap.put("image", mUser.getImage());
-                                hashMap.put("cover", mUser.getCover());
-
                                 if(stt == 1){
                                     hashMap.put("image", downloadUrl.toString());
                                 } else if (stt == 2){
@@ -391,8 +378,10 @@ public class UpdateProfileActivyty extends AppCompatActivity {
 
                                 FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                                 DatabaseReference reference = firebaseDatabase.getReference("Users");
-                                reference.child(mUser.getUid()).setValue(hashMap);
+                                reference.child(mUser.getUid()).updateChildren(hashMap);
 
+                                //////////////
+//                                Toast.makeText(getBaseContext(),getFileName(uri), Toast.LENGTH_LONG).show();
 
                                 // reset muser
                                 reference.child(mUser.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -472,4 +461,25 @@ public class UpdateProfileActivyty extends AppCompatActivity {
             }
         });
     }
+//    public String getFileName(Uri uri) {
+//        String result = null;
+//        if (uri.getScheme().equals("content")) {
+//            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+//            try {
+//                if (cursor != null && cursor.moveToFirst()) {
+//                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+//                }
+//            } finally {
+//                cursor.close();
+//            }
+//        }
+//        if (result == null) {
+//            result = uri.getPath();
+//            int cut = result.lastIndexOf('/');
+//            if (cut != -1) {
+//                result = result.substring(cut + 1);
+//            }
+//        }
+//        return result;
+//    }
 }

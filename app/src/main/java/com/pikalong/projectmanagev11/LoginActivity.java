@@ -123,7 +123,7 @@ public class LoginActivity extends AppCompatActivity {
                 final String email = emailEd.getText().toString();
                 if (!hasFocus) {
                     if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                        emailEd.setError("Email không được để trống");
+                        emailEd.setError("Sai định dạng email");
                         emailEd.setFocusable(true);
                     } else {
                         checkEmail(v, email.trim());
