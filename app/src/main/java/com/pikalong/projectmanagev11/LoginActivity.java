@@ -191,7 +191,7 @@ public class LoginActivity extends AppCompatActivity {
     private void showRecoverDialog() {
         new LovelyTextInputDialog(this)
                 .setTopColor(Color.parseColor("#40C4FF"))
-                .setTitle("Lấy lại mật khẩu")
+                .setTopTitle("Lấy lại mật khẩu")
                 .setMessage("Vui lòng nhập email của bạn")
                 .setInputFilter("Email không hợp lệ", new LovelyTextInputDialog.TextFilter() {
                     @Override

@@ -18,6 +18,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -36,6 +37,7 @@ import com.pikalong.projectmanagev11.adapter.MemberBoxAdapter;
 import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
 import com.pikalong.projectmanagev11.model.Project;
 import com.pikalong.projectmanagev11.model.User;
+import com.squareup.picasso.Picasso;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -51,6 +53,9 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     LinearLayout l_tmp;
     ImageButton btn_add;
 
+    ImageView imgAva, imgCover;
+    TextView tvMemName, tvMemId;
+
     ActionBarDrawerToggle drawerToggle;
     NavigationView navigationView;
     DrawerLayout drawerLayout;
@@ -59,6 +64,8 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     List<Project> projects_da;
     ProjectAdapter projectAdapter_dang;
     ProjectAdapter projectAdapter_da;
+
+
 
     boolean inDang = true;
 
@@ -79,7 +86,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
 
         actionBar = getSupportActionBar();
-        actionBar.setTitle("Pika Team");
+        actionBar.setTitle("Quản lý dự án");
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeAsUpIndicator(R.drawable.ic_option_n);
 
@@ -100,6 +107,12 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
         btn_add = findViewById(R.id.btn_add);
 
+        /////////////// drawer header
+        tvMemName = navigationView.getHeaderView(0).findViewById(R.id.tvMemName);
+        tvMemId = navigationView.getHeaderView(0).findViewById(R.id.tvMemId);
+        imgAva = navigationView.getHeaderView(0).findViewById(R.id.imgAva);
+        imgCover = navigationView.getHeaderView(0).findViewById(R.id.imgCover);
+
         firebaseAuth = FirebaseAuth.getInstance();
         firebaseUser = firebaseAuth.getCurrentUser();
 
@@ -116,12 +129,29 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 mUser = dataSnapshot.getValue(User.class);
+                tvMemName.setText(mUser.getName());
+                tvMemId.setText("ID: " + mUser.getUid());
+
+                if(mUser.getImage().equals("")){
+                    Picasso.get().load(R.drawable.default_avatar).into(imgAva);
+                }
+                else {
+                    Picasso.get().load(mUser.getImage()).into(imgAva);
+                }
+
+                if(mUser.getCover().equals("")){
+                    Picasso.get().load(R.drawable.defause_bgr).into(imgCover);
+                }
+                else {
+                    Picasso.get().load(mUser.getCover()).into(imgCover);
+                }
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
 
             }
         });
+
     }
     private void addEvent(){
 

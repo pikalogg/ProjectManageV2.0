@@ -107,7 +107,9 @@ public class UpdateProfileActivyty extends AppCompatActivity {
         tvName = findViewById(R.id.tvName);
         tvGender = findViewById(R.id.tvGender);
 
-        sweetAlertDialog = new SweetAlertDialog(this);
+
+        sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+        sweetAlertDialog.setCanceledOnTouchOutside(false);
 
         storageReference = FirebaseStorage.getInstance().getReference("Uploads");
         databaseReference = FirebaseDatabase.getInstance().getReference("Users");
@@ -249,7 +251,11 @@ public class UpdateProfileActivyty extends AppCompatActivity {
                 return true;
             case R.id.itemSave:
                 // luu thong tin lai
-                SaveProfile();
+                try {
+                    SaveProfile();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
             default:break;
         }
@@ -313,7 +319,7 @@ public class UpdateProfileActivyty extends AppCompatActivity {
         return mime.getExtensionFromMimeType(contentResolver.getType(uri));
     }
 
-    private void SaveProfile() {
+    private void SaveProfile() throws InterruptedException {
 
         if( edBirthday.getText().toString().equals("")){
             edBirthday.setError("Vui lòng điền ngày sinh");
@@ -325,16 +331,9 @@ public class UpdateProfileActivyty extends AppCompatActivity {
             edBirthday.setFocusable(true);
             return;
         }
-
-//        sweetAlertDialog.setTitleText("Hãy chờ");
-//        sweetAlertDialog.setContentText("Thay đổi đang được lưu.....");
-//        sweetAlertDialog.show();
-
-
         ///up text
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("name", edName.getText().toString());
-        hashMap.put("typingTo", "noOne");
         hashMap.put("phone", edPhone.getText().toString());
         hashMap.put("birthday", edBirthday.getText().toString());
         hashMap.put("gender", tvGender.getText().toString());
@@ -349,8 +348,15 @@ public class UpdateProfileActivyty extends AppCompatActivity {
         upLoadImage(imgUriCov, 2);
         imgUriCov = null;
 
-//        sweetAlertDialog.dismiss();
-        Toast.makeText(this, "Thay đổi đã được lưu lại", Toast.LENGTH_LONG).show();
+        new SweetAlertDialog(UpdateProfileActivyty.this, SweetAlertDialog.SUCCESS_TYPE)
+                .setTitleText("Thay đổi đã được lưu")
+                .setConfirmButton("Ok", new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sweetAlertDialog) {
+                        sweetAlertDialog.dismiss();
+                    }
+                })
+                .show();
     }
 
     private void upLoadImage(final Uri uri, final int stt){
@@ -461,25 +467,5 @@ public class UpdateProfileActivyty extends AppCompatActivity {
             }
         });
     }
-//    public String getFileName(Uri uri) {
-//        String result = null;
-//        if (uri.getScheme().equals("content")) {
-//            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
-//            try {
-//                if (cursor != null && cursor.moveToFirst()) {
-//                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
-//                }
-//            } finally {
-//                cursor.close();
-//            }
-//        }
-//        if (result == null) {
-//            result = uri.getPath();
-//            int cut = result.lastIndexOf('/');
-//            if (cut != -1) {
-//                result = result.substring(cut + 1);
-//            }
-//        }
-//        return result;
-//    }
+
 }
