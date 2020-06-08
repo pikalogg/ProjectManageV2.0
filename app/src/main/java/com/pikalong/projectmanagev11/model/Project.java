@@ -6,10 +6,10 @@ public class Project {
     String uid;
     String usId;
     String tasksId;
-    String title, des, image, timestamp, file;
+    String title, des, image, timestamp, files, imgFiles;
     int status;
 
-    public Project(String uid, String usId, String tasksId, String title, String des, String image, String timestamp, String file, int status) {
+    public Project(String uid, String usId, String tasksId, String title, String des, String image, String timestamp, String files, String imgFiles, int status) {
         this.uid = uid;
         this.usId = usId;
         this.tasksId = tasksId;
@@ -17,16 +17,28 @@ public class Project {
         this.des = des;
         this.image = image;
         this.timestamp = timestamp;
-        this.file = file;
+        this.files = files;
+        this.imgFiles = imgFiles;
         this.status = status;
     }
 
-    public String getFile() {
-        return file;
+    public Project() {
     }
 
-    public void setFile(String file) {
-        this.file = file;
+    public String getFiles() {
+        return files;
+    }
+
+    public void setFiles(String files) {
+        this.files = files;
+    }
+
+    public String getImgFiles() {
+        return imgFiles;
+    }
+
+    public void setImgFiles(String imgFiles) {
+        this.imgFiles = imgFiles;
     }
 
     public String getTimestamp() {

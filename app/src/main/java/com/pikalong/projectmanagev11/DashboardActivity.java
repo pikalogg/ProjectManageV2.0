@@ -225,7 +225,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 Toast.makeText(DashboardActivity.this, "so" + i, Toast.LENGTH_LONG).show();
             }
         });
-        projects_dang.add(new Project("Dsad","ádasd", "đâs", "đâs","đasa","đâs","đâs","đá",1));
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {

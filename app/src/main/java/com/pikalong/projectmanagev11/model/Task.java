@@ -6,10 +6,10 @@ public class Task {
     String uid;
     String usId;
     String projectId;
-    String title, des, image, timestamp, file, fileImage;
+    String title, des, image, timestamp, files, imgFiles;
     int status;
 
-    public Task(String uid, String usId, String projectId, String title, String des, String image, String timestamp, String file, String fileImage, int status) {
+    public Task(String uid, String usId, String projectId, String title, String des, String image, String timestamp, String files, String imgFiles, int status) {
         this.uid = uid;
         this.usId = usId;
         this.projectId = projectId;
@@ -17,9 +17,28 @@ public class Task {
         this.des = des;
         this.image = image;
         this.timestamp = timestamp;
-        this.file = file;
-        this.fileImage = fileImage;
+        this.files = files;
+        this.imgFiles = imgFiles;
         this.status = status;
+    }
+
+    public Task() {
+    }
+
+    public String getFiles() {
+        return files;
+    }
+
+    public void setFiles(String files) {
+        this.files = files;
+    }
+
+    public String getImgFiles() {
+        return imgFiles;
+    }
+
+    public void setImgFiles(String imgFiles) {
+        this.imgFiles = imgFiles;
     }
 
     public String getTimestamp() {
