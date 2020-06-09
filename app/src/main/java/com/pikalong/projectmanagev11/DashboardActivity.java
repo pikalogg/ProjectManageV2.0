@@ -209,9 +209,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                                 projects_da.add(projectTemp);
                                 projectAdapter_da.notifyDataSetChanged();
                             }
-
                         }
-
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
 
@@ -232,11 +230,33 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(DashboardActivity.this, ProjectActivity.class);
                 if(inDang){
-                    intent.putExtra("namePro", projects_dang.get(i).getTitle());
-                    intent.putExtra("projectId", projects_dang.get(i).getId());
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Id", projects_dang.get(i).getId());
+                    bundle.putString("uId", projects_dang.get(i).getUid());
+                    bundle.putString("usId", projects_dang.get(i).getUsId());
+                    bundle.putString("tasksId", projects_dang.get(i).getTasksId());
+                    bundle.putString("title", projects_dang.get(i).getTitle());
+                    bundle.putString("des", projects_dang.get(i).getDes());
+                    bundle.putString("image", projects_dang.get(i).getImage());
+                    bundle.putString("files", projects_dang.get(i).getFiles());
+                    bundle.putString("imgFiles", projects_dang.get(i).getImage());
+                    bundle.putInt("status", projects_dang.get(i).getStatus());
+                    intent.putExtras(bundle);
+
                 } else {
-                    intent.putExtra("namePro", projects_da.get(i).getTitle());
-                    intent.putExtra("projectId", projects_da.get(i).getId());
+                    Bundle bundle = new Bundle();
+                    bundle.putString("Id", projects_da.get(i).getId());
+                    bundle.putString("uId", projects_da.get(i).getUid());
+                    bundle.putString("usId", projects_da.get(i).getUsId());
+                    bundle.putString("tasksId", projects_da.get(i).getTasksId());
+                    bundle.putString("title", projects_da.get(i).getTitle());
+                    bundle.putString("des", projects_da.get(i).getDes());
+                    bundle.putString("image", projects_da.get(i).getImage());
+                    bundle.putString("files", projects_da.get(i).getFiles());
+                    bundle.putString("imgFiles", projects_da.get(i).getImage());
+                    bundle.putInt("status", projects_da.get(i).getStatus());
+                    intent.putExtras(bundle);
+
                 }
                 startActivity(intent);
                 finish();

@@ -40,8 +40,8 @@
     </item>
 
     <item
-        android:id="@+id/action_return"
+        android:id="@+id/action_continue"
         android:orderInCategory="100"
-        android:title="Kết thúc dự án"
+        android:title="Mở lại dự án"
         app:showAsAction="never" />
 </menu>

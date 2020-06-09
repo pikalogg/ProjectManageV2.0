@@ -24,9 +24,9 @@
     <item android:title="Thành viên" >
         <menu>
             <item
-                android:id="@+id/action_addMem"
+                android:id="@+id/action_leave"
                 android:orderInCategory="100"
-                android:title="Thêm thành viên"
+                android:title="Rút khỏi dự án"
                 app:showAsAction="never" />
 
             <item
@@ -39,9 +39,4 @@
 
     </item>
 
-    <item
-        android:id="@+id/action_return"
-        android:orderInCategory="100"
-        android:title="Kết thúc dự án"
-        app:showAsAction="never" />
 </menu>

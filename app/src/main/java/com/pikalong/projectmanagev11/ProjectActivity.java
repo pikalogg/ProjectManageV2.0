@@ -1,30 +1,33 @@
 package com.pikalong.projectmanagev11;
 
-        import androidx.appcompat.app.ActionBar;
-        import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 
-        import android.annotation.SuppressLint;
-        import android.content.Intent;
-        import android.os.Bundle;
-        import android.util.Log;
-        import android.view.Gravity;
-        import android.view.Menu;
-        import android.view.MenuItem;
-        import android.view.View;
-        import android.widget.AdapterView;
-        import android.widget.ImageButton;
-        import android.widget.LinearLayout;
-        import android.widget.ListView;
-        import android.widget.Switch;
-        import android.widget.TextView;
+import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.Switch;
+import android.widget.TextView;
+import android.widget.Toast;
 
-        import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
-        import com.pikalong.projectmanagev11.adapter.TaskAdapter;
-        import com.pikalong.projectmanagev11.model.Project;
-        import com.pikalong.projectmanagev11.model.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
+import com.pikalong.projectmanagev11.adapter.TaskAdapter;
+import com.pikalong.projectmanagev11.model.Project;
+import com.pikalong.projectmanagev11.model.Task;
 
-        import java.util.ArrayList;
-        import java.util.List;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProjectActivity extends AppCompatActivity {
     ActionBar actionBar;
@@ -46,6 +49,10 @@ public class ProjectActivity extends AppCompatActivity {
     TaskAdapter taskAdapter_ht;
 
     ImageButton btn_add;
+
+    Bundle bundle;
+
+    FirebaseUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,10 +64,13 @@ public class ProjectActivity extends AppCompatActivity {
 
     private void addControl(){
         intent = getIntent();
-        String title = intent.getStringExtra("namePro");
+        bundle = intent.getExtras();
+
         actionBar = getSupportActionBar();
-        actionBar.setTitle(title);
+        actionBar.setTitle(bundle.getString("title", ""));
         actionBar.setDisplayHomeAsUpEnabled(true);
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
 
         listView = findViewById(R.id.lv_conten);
         btn_gv = findViewById(R.id.btn_giaoviec);
@@ -73,6 +83,9 @@ public class ProjectActivity extends AppCompatActivity {
 
         btn_add = findViewById(R.id.btn_add);
 
+        if(!user.getUid().equals(bundle.getString("uId","")) || bundle.getInt("status", 0) == 1){
+            btn_add.setVisibility(View.GONE);
+        }
     }
     private void addEvent(){
         btn_gv.setOnClickListener(new View.OnClickListener() {
@@ -122,7 +135,11 @@ public class ProjectActivity extends AppCompatActivity {
     }
 
     private  void addData(){
-//        tasks = new ArrayList<>();
+        tasks = new ArrayList<>();
+        tasks_gv = new ArrayList<>();
+        tasks_dl = new ArrayList<>();
+        tasks_kt = new ArrayList<>();
+        tasks_ht = new ArrayList<>();
 //        //gv
 //        tasks.add(new Task("công việc cao cả", "đứng im một chỗ"));
 //        tasks.add(new Task("công việc bần hàn", "đi qua đi lại"));
@@ -141,10 +158,7 @@ public class ProjectActivity extends AppCompatActivity {
 //        tmp2.setNameSu("Vũ Thị Ngọc Lê");
 //        tasks.add(tmp2);
 //
-//        tasks_gv = new ArrayList<>();
-//        tasks_dl = new ArrayList<>();
-//        tasks_kt = new ArrayList<>();
-//        tasks_ht = new ArrayList<>();
+
 //
 //        for (int i=0;i<tasks.size();i++){
 //            Task task = tasks.get(i);
@@ -166,12 +180,12 @@ public class ProjectActivity extends AppCompatActivity {
 //            }
 //        }
 //
-//        taskAdapter_gv = new TaskAdapter(tasks_gv, getApplicationContext());
-//        taskAdapter_dl = new TaskAdapter(tasks_dl, getApplicationContext());
-//        taskAdapter_kt = new TaskAdapter(tasks_kt, getApplicationContext());
-//        taskAdapter_ht = new TaskAdapter(tasks_ht, getApplicationContext());
-//
-//        listView.setAdapter(taskAdapter_gv);
+        taskAdapter_gv = new TaskAdapter(tasks_gv, getApplicationContext());
+        taskAdapter_dl = new TaskAdapter(tasks_dl, getApplicationContext());
+        taskAdapter_kt = new TaskAdapter(tasks_kt, getApplicationContext());
+        taskAdapter_ht = new TaskAdapter(tasks_ht, getApplicationContext());
+
+        listView.setAdapter(taskAdapter_gv);
 //        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 //            @Override
 //            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -213,7 +227,17 @@ public class ProjectActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_pro, menu);
+
+        if(user.getUid().equals(bundle.getString("uId",""))){
+            if(bundle.getInt("status", 0) == 0){
+                getMenuInflater().inflate(R.menu.menu_pro_leader, menu);
+            } else {
+                getMenuInflater().inflate(R.menu.menu_pro_leader_kt, menu);
+            }
+        }
+        else {
+            getMenuInflater().inflate(R.menu.menu_pro_member, menu);
+        }
         return true;
     }
     @Override
@@ -228,15 +252,9 @@ public class ProjectActivity extends AppCompatActivity {
             case android.R.id.home:
                 onBackPressed(); //nut quay lai cua dien thoai
                 return true;
-            case R.id.action_file:
-                btn_gv.setText("pika");
-                return true;
-            case R.id.action_delete:
+                ///////////////// action #
 
-                return true;
-            case R.id.action_return:
-//
-                return true;
+
             default:
                 break;
         }
