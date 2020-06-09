@@ -8,12 +8,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +21,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -37,10 +34,8 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.pikalong.projectmanagev11.model.User;
@@ -264,7 +259,12 @@ public class UpdateProfileActivyty extends AppCompatActivity {
     }
 
 
-
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(UpdateProfileActivyty.this, DashboardActivity.class);
+        startActivity(intent);
+        finish();
+    }
     ////////////// choie img
     public void pickImageAvata() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -348,18 +348,15 @@ public class UpdateProfileActivyty extends AppCompatActivity {
         upLoadImage(imgUriCov, 2);
         imgUriCov = null;
 
-        new SweetAlertDialog(UpdateProfileActivyty.this, SweetAlertDialog.SUCCESS_TYPE)
-                .setTitleText("Thay đổi đã được lưu")
-                .setConfirmButton("Ok", new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(SweetAlertDialog sweetAlertDialog) {
-                        sweetAlertDialog.dismiss();
-                    }
-                })
-                .show();
+
     }
 
     private void upLoadImage(final Uri uri, final int stt){
+        if(stt == 1){
+            sweetAlertDialog.setTitle("Đang lưu những thay đổi");
+            sweetAlertDialog.setContentText("Hãy chờ...");
+            sweetAlertDialog.show();
+        }
         if(uri != null){
             final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(uri));
             uploadTask = (UploadTask) fileReference.putFile(uri)
@@ -400,16 +397,42 @@ public class UpdateProfileActivyty extends AppCompatActivity {
 
                                     }
                                 });
+                                if (stt == 2){
+                                    sweetAlertDialog.dismiss();
+                                    new SweetAlertDialog(UpdateProfileActivyty.this, SweetAlertDialog.SUCCESS_TYPE)
+                                            .setTitleText("Thay đổi đã được lưu lại")
+                                            .setConfirmButton("Ok", new SweetAlertDialog.OnSweetClickListener() {
+                                                @Override
+                                                public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                                    sweetAlertDialog.dismiss();
+                                                }
+                                            })
+                                            .show();
+                                }
                             }
                         });
                     }
                 });
         }
+        else {
+            if (stt == 2){
+                sweetAlertDialog.dismiss();
+                new SweetAlertDialog(UpdateProfileActivyty.this, SweetAlertDialog.SUCCESS_TYPE)
+                        .setTitleText("Thay đổi đã được lưu lại")
+                        .setConfirmButton("Ok", new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sweetAlertDialog) {
+                                sweetAlertDialog.dismiss();
+                            }
+                        })
+                        .show();
+            }
+        }
     }
 
     private void updatePass(String currentpass, final String newpass) {
-        sweetAlertDialog.setTitleText("Updating password");
-        sweetAlertDialog.setContentText("Please wait.....");
+        sweetAlertDialog.setTitleText("Đang thay đổi mật khẩu");
+        sweetAlertDialog.setContentText("Chờ.....");
         sweetAlertDialog.show();
         final String email = user.getEmail();
         AuthCredential credential = EmailAuthProvider.getCredential(email,currentpass);
@@ -427,10 +450,14 @@ public class UpdateProfileActivyty extends AppCompatActivity {
                             {
                                 new SweetAlertDialog(UpdateProfileActivyty.this, SweetAlertDialog.SUCCESS_TYPE)
                                         .setTitleText("Mật khẩu đã được thay đổi")
+                                        .setContentText("Mời đăng nhập lại")
                                         .setConfirmButton("Ok", new SweetAlertDialog.OnSweetClickListener() {
                                             @Override
                                             public void onClick(SweetAlertDialog sweetAlertDialog) {
                                                 sweetAlertDialog.dismiss();
+                                                FirebaseAuth.getInstance().signOut();
+                                                Intent intent = new Intent(UpdateProfileActivyty.this, LoginActivity.class);
+                                                startActivity(intent);
                                                 finish();
                                             }
                                         })

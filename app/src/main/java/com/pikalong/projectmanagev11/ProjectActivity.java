@@ -245,7 +245,8 @@ public class ProjectActivity extends AppCompatActivity {
     //nut back dt
     @Override
     public void onBackPressed() {
-//        super.onBackPressed();
+        intent = new Intent(ProjectActivity.this, DashboardActivity.class);
+        startActivity(intent);
         finish();
     }
 }

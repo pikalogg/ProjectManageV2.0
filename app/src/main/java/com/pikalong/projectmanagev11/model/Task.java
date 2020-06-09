@@ -3,13 +3,15 @@ package com.pikalong.projectmanagev11.model;
 import java.sql.Time;
 
 public class Task {
+    String id;
     String uid;
     String usId;
     String projectId;
     String title, des, image, timestamp, files, imgFiles;
     int status;
 
-    public Task(String uid, String usId, String projectId, String title, String des, String image, String timestamp, String files, String imgFiles, int status) {
+    public Task(String id, String uid, String usId, String projectId, String title, String des, String image, String timestamp, String files, String imgFiles, int status) {
+        this.id = id;
         this.uid = uid;
         this.usId = usId;
         this.projectId = projectId;
@@ -23,6 +25,14 @@ public class Task {
     }
 
     public Task() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getFiles() {

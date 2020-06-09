@@ -39,7 +39,7 @@ public class ProjectAdapter extends BaseAdapter {
         return i;
     }
     class ProjectViewHolder{
-        TextView title, des;
+        TextView title, des, time;
         ImageView image;
     }
 
@@ -52,10 +52,12 @@ public class ProjectAdapter extends BaseAdapter {
             view = inflater.inflate(R.layout.activity_row_project, null);
             projectViewHolder.title = view.findViewById(R.id.t_title);
             projectViewHolder.des = view.findViewById(R.id.t_des);
+            projectViewHolder.time = view.findViewById(R.id.t_time);
             projectViewHolder.image = view.findViewById(R.id.img_pro);
             Project project = projects.get(i);
             projectViewHolder.title.setText(project.getTitle());
             projectViewHolder.des.setText(project.getDes());
+            projectViewHolder.time.setText(project.getTimestamp());
             Picasso.get().load(project.getImage())
                     .error(R.drawable.haha)
                     .placeholder(R.drawable.haha)
@@ -67,6 +69,7 @@ public class ProjectAdapter extends BaseAdapter {
             Project project = projects.get(i);
             projectViewHolder.title.setText(project.getTitle());
             projectViewHolder.des.setText(project.getDes());
+            projectViewHolder.time.setText(project.getTimestamp());
             Picasso.get().load(project.getImage())
                     .error(R.drawable.haha)
                     .placeholder(R.drawable.haha)

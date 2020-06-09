@@ -245,7 +245,7 @@
             android:orientation="vertical">
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btnAddPro"
                 android:layout_width="296dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"

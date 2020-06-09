@@ -3,13 +3,15 @@ package com.pikalong.projectmanagev11.model;
 import java.util.List;
 
 public class Project {
+    String id;
     String uid;
     String usId;
     String tasksId;
     String title, des, image, timestamp, files, imgFiles;
     int status;
 
-    public Project(String uid, String usId, String tasksId, String title, String des, String image, String timestamp, String files, String imgFiles, int status) {
+    public Project(String id, String uid, String usId, String tasksId, String title, String des, String image, String timestamp, String files, String imgFiles, int status) {
+        this.id = id;
         this.uid = uid;
         this.usId = usId;
         this.tasksId = tasksId;
@@ -22,7 +24,29 @@ public class Project {
         this.status = status;
     }
 
+    public Project(Project project) {
+        this.id = project.id;
+        this.uid = project.uid;
+        this.usId = project.usId;
+        this.tasksId = project.tasksId;
+        this.title = project.title;
+        this.des = project.des;
+        this.image = project.image;
+        this.timestamp = project.timestamp;
+        this.files = project.files;
+        this.imgFiles = project.imgFiles;
+        this.status = project.status;
+    }
+
     public Project() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getFiles() {

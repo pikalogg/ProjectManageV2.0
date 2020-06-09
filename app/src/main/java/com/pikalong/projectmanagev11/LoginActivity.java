@@ -122,7 +122,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onFocusChange(View v, boolean hasFocus) {
                 final String email = emailEd.getText().toString();
                 if (!hasFocus) {
-                    if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    if (!Patterns.EMAIL_ADDRESS.matcher(email).matches() && TextUtils.isEmpty(email)) {
                         emailEd.setError("Sai định dạng email");
                         emailEd.setFocusable(true);
                     } else {

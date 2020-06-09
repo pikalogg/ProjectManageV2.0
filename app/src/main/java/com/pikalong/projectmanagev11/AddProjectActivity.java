@@ -34,20 +34,31 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.pikalong.projectmanagev11.adapter.MemberBoxAdapter;
 import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
 import com.pikalong.projectmanagev11.model.Project;
 import com.pikalong.projectmanagev11.model.User;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class AddProjectActivity extends AppCompatActivity {
     private static final int PICK_IMG_FILE = 101;
@@ -78,8 +89,21 @@ public class AddProjectActivity extends AppCompatActivity {
     String proDes = "";
 
 
+    Button btnAddPro;
     boolean checkMem = false;
     String tmpUid;
+    String keyPro = "";
+
+    FirebaseUser user;
+    StorageReference storageReference;
+    DatabaseReference databaseReference;
+    UploadTask uploadTask;
+
+    EditText edNamePro, edDesPro;
+
+    SweetAlertDialog sweetAlertDialog;
+
+    int gd = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,6 +127,7 @@ public class AddProjectActivity extends AppCompatActivity {
         memberUid = new ArrayList<>();
         members = new ArrayList<>();
 
+        sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
 
         lvAddFile = findViewById(R.id.lvAddFile);
         llAddFile = findViewById(R.id.llAddFile);
@@ -116,6 +141,15 @@ public class AddProjectActivity extends AppCompatActivity {
         imgFiles = new ArrayList<>();
         imgFileUrl = new ArrayList<>();
 
+        edDesPro = findViewById(R.id.edDesPro);
+        edNamePro = findViewById(R.id.edNamePro);
+
+        btnAddPro = findViewById(R.id.btnAddPro);
+
+
+        storageReference = FirebaseStorage.getInstance().getReference("Uploads");
+        databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+        user = FirebaseAuth.getInstance().getCurrentUser();
     }
     private void addEvent(){
         llAddMem.setOnClickListener(new View.OnClickListener() {
@@ -156,9 +190,14 @@ public class AddProjectActivity extends AppCompatActivity {
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                                 if (dataSnapshot.hasChildren()){
-                                    User user = dataSnapshot.getValue(User.class);
+                                    User tuser = dataSnapshot.getValue(User.class);
+                                    if(user.getUid().equals(tuser.getUid())){
+                                        Toast.makeText(getBaseContext(), "Bạn mặc định là nhóm trưởng của dự án này", Toast.LENGTH_LONG).show();
+                                        checkMem = false;
+                                        return;
+                                    }
                                     checkMem = true;
-                                    tvMemName.setText(user.getName());
+                                    tvMemName.setText(tuser.getName());
                                 }
                                 else {
                                     checkMem = false;
@@ -221,6 +260,12 @@ public class AddProjectActivity extends AppCompatActivity {
                 startActivityForResult(intent, PICK_FILE);
             }
         });
+        btnAddPro.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addPro();
+            }
+        });
 
     }
     @Override
@@ -277,8 +322,7 @@ public class AddProjectActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 members.remove(i);
                 memberUid.remove(i);
-                memberBoxAdapter = new MemberBoxAdapter(members, getApplicationContext());
-                lvAddMem.setAdapter(memberBoxAdapter);
+                memberBoxAdapter.notifyDataSetChanged();
 
                 if (members.size() == 0) {
                     lvAddMem.setVisibility(View.GONE);
@@ -294,8 +338,7 @@ public class AddProjectActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 imgFiles.remove(i);
                 imgFileUrl.remove(i);
-                imgFileAdapter = new MemberBoxAdapter(imgFiles, getApplicationContext());
-                lvAddImgFile.setAdapter(imgFileAdapter);
+                imgFileAdapter.notifyDataSetChanged();
 
                 if (imgFiles.size() == 0) {
                     lvAddImgFile.setVisibility(View.GONE);
@@ -311,15 +354,13 @@ public class AddProjectActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 files.remove(i);
                 fileUrl.remove(i);
-                fileAdapter = new MemberBoxAdapter(files, getApplicationContext());
-                lvAddFile.setAdapter(fileAdapter);
+                fileAdapter.notifyDataSetChanged();
 
                 if (files.size() == 0) {
                     lvAddFile.setVisibility(View.GONE);
                 }
             }
         });
-
     }
 
     @Override
@@ -342,14 +383,153 @@ public class AddProjectActivity extends AppCompatActivity {
     //nut back dt
     @Override
     public void onBackPressed() {
-//        super.onBackPressed();
+
+        Intent intent = new Intent(AddProjectActivity.this, DashboardActivity.class);
+        startActivity(intent);
         finish();
     }
 
     //////////////////////////////////////////////////////////
+    private void addPro(){
+
+        proName = edNamePro.getText().toString();
+        proDes = edDesPro.getText().toString();
+
+        if(proName.equals("")){
+            edNamePro.setError("Tên dự án không được để trống!");
+            edNamePro.setFocusable(true);
+            return;
+        }
+        sweetAlertDialog.setTitle("Đang tạo project");
+        sweetAlertDialog.setContentText("Hãy chờ...");
+        sweetAlertDialog.show();
 
 
 
+        uploadFile();
+    }
+
+    private void uploadFile(){
+
+        //up img
+        for(int i =0;i<imgFilesUri.size();i++){
+            Uri uri = imgFilesUri.get(i);
+            if(uri != null){
+                final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(uri));
+                final int finalI = i;
+                uploadTask = (UploadTask) fileReference.putFile(uri)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    final Uri downloadUrl = uri;
+                                    imgFileUrl.add(downloadUrl.toString());
+                                }
+                            });
+                        }
+                    });
+            }
+        }
+        //upfile
+        for(int i =0;i< filesUri.size();i++){
+            Uri uri = filesUri.get(i);
+            if(uri != null){
+                final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(uri));
+                final int finalI = i;
+                uploadTask = (UploadTask) fileReference.putFile(uri)
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                            final Uri downloadUrl = uri;
+
+                            fileUrl.add(downloadUrl.toString());
+                            if (finalI == filesUri.size()-1){
+                                HashMap<String, Object> hashMap = new HashMap<>();
+                                hashMap.put("uId", user.getUid());
+                                hashMap.put("usId", listToString(memberUid));
+                                hashMap.put("tasksId", "");
+                                hashMap.put("title", proName);
+                                hashMap.put("des", proDes);
+                                hashMap.put("timestamp", new Timestamp(System.currentTimeMillis()).toString());
+                                hashMap.put("image", "https://");
+                                hashMap.put("files", listToString(fileUrl));
+                                hashMap.put("imgFiles", listToString(imgFileUrl)); //lấy sau
+                                hashMap.put("status", 0);
+
+                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                DatabaseReference reference = firebaseDatabase.getReference("Projects");
+                                keyPro = reference.push().getKey();
+                                hashMap.put("id", keyPro);
+                                reference.child(keyPro).setValue(hashMap);
+
+                                //up uID
+                                final DatabaseReference referenceU = firebaseDatabase.getReference("Users");
+                                referenceU.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        User mUser = dataSnapshot.getValue(User.class);
+
+                                        HashMap<String, Object> hashMapU = new HashMap<>();
+                                        hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+
+                                        referenceU.child(user.getUid()).updateChildren(hashMapU);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                                // up usID
+                                for (final String uId : memberUid){
+                                    referenceU.child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                            User mUser = dataSnapshot.getValue(User.class);
+
+                                            HashMap<String, Object> hashMapU = new HashMap<>();
+                                            hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+
+                                            referenceU.child(uId).updateChildren(hashMapU);
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                        }
+                                    });
+                                }
+
+                                sweetAlertDialog.dismiss();
+
+                                Intent intent = new Intent(AddProjectActivity.this, DashboardActivity.class);
+                                startActivity(intent);
+                                finish();
+                            }
+                            }
+                        });
+                        }
+                    });
+            }
+        }
+
+    }
 
 
 
@@ -402,5 +582,23 @@ public class AddProjectActivity extends AppCompatActivity {
         ContentResolver contentResolver = getContentResolver();
         MimeTypeMap mime = MimeTypeMap.getSingleton();
         return mime.getExtensionFromMimeType(contentResolver.getType(uri));
+    }
+    ///////////////////////////////
+    private String listToString(List<String> mLists){
+        String conten = "";
+        for (String str : mLists){
+            conten += str + "|";
+        }
+        return  conten;
+    }
+
+    private  List<String> stringToList(String mStr){
+        List<String> mLists = new ArrayList<>();
+        String[] strs = mStr.split("\\|");
+        for (String str : strs){
+            if(!str.equals(""))
+                mLists.add(str);
+        }
+        return  mLists;
     }
 }

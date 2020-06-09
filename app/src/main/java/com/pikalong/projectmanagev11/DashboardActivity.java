@@ -72,6 +72,8 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     FirebaseAuth firebaseAuth;
     FirebaseUser firebaseUser;
     User mUser;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -123,35 +125,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         }
         mUser = null;
 
-        String uid = firebaseUser.getUid();
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(uid);
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                mUser = dataSnapshot.getValue(User.class);
-                tvMemName.setText(mUser.getName());
-                tvMemId.setText("ID: " + mUser.getUid());
-
-                if(mUser.getImage().equals("")){
-                    Picasso.get().load(R.drawable.default_avatar).into(imgAva);
-                }
-                else {
-                    Picasso.get().load(mUser.getImage()).into(imgAva);
-                }
-
-                if(mUser.getCover().equals("")){
-                    Picasso.get().load(R.drawable.defause_bgr).into(imgCover);
-                }
-                else {
-                    Picasso.get().load(mUser.getCover()).into(imgCover);
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
     }
     private void addEvent(){
 
@@ -179,7 +152,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             public void onClick(View view) {
                 Intent intent = new Intent(DashboardActivity.this, AddProjectActivity.class);
                 startActivity(intent);
-//                finish();
+                finish();
             }
         });
 
@@ -190,39 +163,83 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
     private  void addData(){
         projects_dang = new ArrayList<>();
-//        projects_dang.add(new Project("Dự án 1", "chả cần làm gì"));
-//        projects_dang.add(new Project("Dự án 2", "chả cần làm gì"));
-//        projects_dang.add(new Project("Dự án 3", "chả cần làm gì"));
-//        projects_dang.add(new Project("Dự án 4", "chả cần làm gì"));
-//        projects_dang.add(new Project("Dự án 5", "chả cần làm gì"));
-//        projects_dang.add(new Project("Dự án 6", "chả cần làm gì"));
-//        projects_dang.add(new Project("Dự án 7", "chả cần làm gì"));
-//
         projects_da = new ArrayList<>();
-//        projects_da.add(new Project("Dự án xong 1", "chả cần làm gì"));
-//        projects_da.add(new Project("Dự án xong 2", "chả cần làm gì"));
-//
         projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
         projectAdapter_da = new ProjectAdapter(projects_da , getApplicationContext());
 
         listView.setAdapter(projectAdapter_dang);
+        String uid = firebaseUser.getUid();
+        final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference reference = firebaseDatabase.getReference("Users").child(uid);
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mUser = dataSnapshot.getValue(User.class);
+                tvMemName.setText(mUser.getName());
+                tvMemId.setText("ID: " + mUser.getUid());
+
+                if(mUser.getImage().equals("")){
+                    Picasso.get().load(R.drawable.default_avatar).into(imgAva);
+                }
+                else {
+                    Picasso.get().load(mUser.getImage()).into(imgAva);
+                }
+
+                if(mUser.getCover().equals("")){
+                    Picasso.get().load(R.drawable.defause_bgr).into(imgCover);
+                }
+                else {
+                    Picasso.get().load(mUser.getCover()).into(imgCover);
+                }
+
+
+                DatabaseReference referenceP = firebaseDatabase.getReference("Projects");
+                List<String> projects = stringToList(mUser.getProjects());
+//
+                for(final String project : projects){
+                    referenceP.child(project).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Project projectTemp = dataSnapshot.getValue(Project.class);
+                            if (projectTemp.getStatus() == 0) {
+                                projects_dang.add(projectTemp);
+                                projectAdapter_dang.notifyDataSetChanged();
+                            }
+                            if (projectTemp.getStatus() == 1) {
+                                projects_da.add(projectTemp);
+                                projectAdapter_da.notifyDataSetChanged();
+                            }
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
 
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Intent intent = new Intent(DashboardActivity.this, ProjectActivity.class);
-//                if(inDang){
-//                    intent.putExtra("namePro", projects_dang.get(i).getTitle());
-//                } else {
-//                    intent.putExtra("namePro", projects_da.get(i).getTitle());
-//                }
-//                startActivity(intent);
-//                finish();
-                projects_dang.remove(i);
-                projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
-                listView.setAdapter(projectAdapter_dang);
-                Toast.makeText(DashboardActivity.this, "so" + i, Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(DashboardActivity.this, ProjectActivity.class);
+                if(inDang){
+                    intent.putExtra("namePro", projects_dang.get(i).getTitle());
+                    intent.putExtra("projectId", projects_dang.get(i).getId());
+                } else {
+                    intent.putExtra("namePro", projects_da.get(i).getTitle());
+                    intent.putExtra("projectId", projects_da.get(i).getId());
+                }
+                startActivity(intent);
+                finish();
             }
         });
     }
@@ -255,7 +272,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             case R.id.drawerProfile:
                 intent = new Intent(DashboardActivity.this, UpdateProfileActivyty.class);
                 startActivity(intent);
-//                finish();
+                finish();
                 break;
 
 
@@ -288,5 +305,23 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                 break;
         }
         return false;
+    }
+    ///////////////////////////////
+    private String listToString(List<String> mLists){
+        String conten = "";
+        for (String str : mLists){
+            conten += str + "|";
+        }
+        return  conten;
+    }
+
+    private  List<String> stringToList(String mStr){
+        List<String> mLists = new ArrayList<>();
+        String[] strs = mStr.split("\\|");
+        for (String str : strs){
+            if(!str.equals(""))
+                mLists.add(str);
+        }
+        return  mLists;
     }
 }
