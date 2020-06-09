@@ -384,8 +384,8 @@ public class AddProjectActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        Intent intent = new Intent(AddProjectActivity.this, DashboardActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(AddProjectActivity.this, DashboardActivity.class);
+//        startActivity(intent);
         finish();
     }
 
@@ -410,76 +410,44 @@ public class AddProjectActivity extends AppCompatActivity {
     }
 
     private void uploadFile(){
+        if(imgFilesUri.size()==0){
+            if(filesUri.size()==0){
+                HashMap<String, Object> hashMap = new HashMap<>();
+                hashMap.put("uId", user.getUid());
+                hashMap.put("usId", listToString(memberUid));
+                hashMap.put("tasksId", "");
+                hashMap.put("title", proName);
+                hashMap.put("des", proDes);
+                hashMap.put("timestamp", new Timestamp(System.currentTimeMillis()).toString());
+                hashMap.put("image", "https://");
+                hashMap.put("files", listToString(fileUrl));
+                hashMap.put("imgFiles", listToString(imgFileUrl)); //lấy sau
+                hashMap.put("status", 0);
 
-        //up img
-        for(int i =0;i<imgFilesUri.size();i++){
-            Uri uri = imgFilesUri.get(i);
-            if(uri != null){
-                final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(uri));
-                final int finalI = i;
-                uploadTask = (UploadTask) fileReference.putFile(uri)
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
+                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                DatabaseReference reference = firebaseDatabase.getReference("Projects");
+                keyPro = reference.push().getKey();
+                hashMap.put("id", keyPro);
+                reference.child(keyPro).setValue(hashMap);
 
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                @Override
-                                public void onSuccess(Uri uri) {
-                                    final Uri downloadUrl = uri;
-                                    imgFileUrl.add(downloadUrl.toString());
-                                }
-                            });
-                        }
-                    });
-            }
-        }
-        //upfile
-        for(int i =0;i< filesUri.size();i++){
-            Uri uri = filesUri.get(i);
-            if(uri != null){
-                final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(uri));
-                final int finalI = i;
-                uploadTask = (UploadTask) fileReference.putFile(uri)
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                            @Override
-                            public void onSuccess(Uri uri) {
-                            final Uri downloadUrl = uri;
-
-                            fileUrl.add(downloadUrl.toString());
-                            if (finalI == filesUri.size()-1){
-                                HashMap<String, Object> hashMap = new HashMap<>();
-                                hashMap.put("uId", user.getUid());
-                                hashMap.put("usId", listToString(memberUid));
-                                hashMap.put("tasksId", "");
-                                hashMap.put("title", proName);
-                                hashMap.put("des", proDes);
-                                hashMap.put("timestamp", new Timestamp(System.currentTimeMillis()).toString());
-                                hashMap.put("image", "https://");
-                                hashMap.put("files", listToString(fileUrl));
-                                hashMap.put("imgFiles", listToString(imgFileUrl)); //lấy sau
-                                hashMap.put("status", 0);
-
-                                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-                                DatabaseReference reference = firebaseDatabase.getReference("Projects");
-                                keyPro = reference.push().getKey();
-                                hashMap.put("id", keyPro);
-                                reference.child(keyPro).setValue(hashMap);
-
-                                //up uID
-                                final DatabaseReference referenceU = firebaseDatabase.getReference("Users");
-                                referenceU.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                //up uID
+                final DatabaseReference referenceU = firebaseDatabase.getReference("Users");
+                referenceU.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        User mUser = dataSnapshot.getValue(User.class);
+                        HashMap<String, Object> hashMapU = new HashMap<>();
+                        hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+                        referenceU.child(user.getUid()).updateChildren(hashMapU);
+                        // up usID
+                        if (memberUid.size() == 0){
+                            sweetAlertDialog.dismiss();
+                            finish();
+                        } else {
+                            for (int k = 0; k< memberUid.size();k++){
+                                final String uId = memberUid.get(k);
+                                final int finalK = k;
+                                referenceU.child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                         User mUser = dataSnapshot.getValue(User.class);
@@ -487,7 +455,12 @@ public class AddProjectActivity extends AppCompatActivity {
                                         HashMap<String, Object> hashMapU = new HashMap<>();
                                         hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
 
-                                        referenceU.child(user.getUid()).updateChildren(hashMapU);
+                                        referenceU.child(uId).updateChildren(hashMapU);
+
+                                        if(finalK == memberUid.size()-1){
+                                            sweetAlertDialog.dismiss();
+                                            finish();
+                                        }
                                     }
 
                                     @Override
@@ -495,37 +468,302 @@ public class AddProjectActivity extends AppCompatActivity {
 
                                     }
                                 });
+                            }
+                        }
+                    }
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                // up usID
-                                for (final String uId : memberUid){
-                                    referenceU.child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    }
+                });
+
+
+
+            }
+            else {
+                for(int j =0;j< filesUri.size();j++){
+                    Uri urifile = filesUri.get(j);
+                    if(urifile != null){
+                        final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(urifile));
+                        final int finalJ = j;
+                        uploadTask = (UploadTask) fileReference.putFile(urifile)
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+
+                                    }
+                                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                        fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                            @Override
+                                            public void onSuccess(Uri uri) {
+                                                final Uri downloadUrl = uri;
+
+                                                fileUrl.add(downloadUrl.toString());
+                                                if (finalJ == filesUri.size()-1){
+                                                    HashMap<String, Object> hashMap = new HashMap<>();
+                                                    hashMap.put("uId", user.getUid());
+                                                    hashMap.put("usId", listToString(memberUid));
+                                                    hashMap.put("tasksId", "");
+                                                    hashMap.put("title", proName);
+                                                    hashMap.put("des", proDes);
+                                                    hashMap.put("timestamp", new Timestamp(System.currentTimeMillis()).toString());
+                                                    hashMap.put("image", "https://");
+                                                    hashMap.put("files", listToString(fileUrl));
+                                                    hashMap.put("imgFiles", listToString(imgFileUrl)); //lấy sau
+                                                    hashMap.put("status", 0);
+
+                                                    FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                                    DatabaseReference reference = firebaseDatabase.getReference("Projects");
+                                                    keyPro = reference.push().getKey();
+                                                    hashMap.put("id", keyPro);
+                                                    reference.child(keyPro).setValue(hashMap);
+
+                                                    final DatabaseReference referenceU = firebaseDatabase.getReference("Users");
+                                                    referenceU.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            User mUser = dataSnapshot.getValue(User.class);
+                                                            HashMap<String, Object> hashMapU = new HashMap<>();
+                                                            hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+                                                            referenceU.child(user.getUid()).updateChildren(hashMapU);
+                                                            // up usID
+                                                            if (memberUid.size() == 0){
+                                                                sweetAlertDialog.dismiss();
+                                                                finish();
+                                                            } else {
+                                                                for (int k = 0; k< memberUid.size();k++){
+                                                                    final String uId = memberUid.get(k);
+                                                                    final int finalK = k;
+                                                                    referenceU.child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                        @Override
+                                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                            User mUser = dataSnapshot.getValue(User.class);
+
+                                                                            HashMap<String, Object> hashMapU = new HashMap<>();
+                                                                            hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+
+                                                                            referenceU.child(uId).updateChildren(hashMapU);
+
+                                                                            if(finalK == memberUid.size()-1){
+                                                                                sweetAlertDialog.dismiss();
+                                                                                finish();
+                                                                            }
+                                                                        }
+
+                                                                        @Override
+                                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                        }
+                                                                    });
+                                                                }
+                                                            }
+                                                        }
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                        }
+                                                    });
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                    }
+                }
+            }
+        }
+        else {
+            //up img
+            for(int i =0;i<imgFilesUri.size();i++){
+                Uri uriImg = imgFilesUri.get(i);
+                if(uriImg != null){
+                    final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(uriImg));
+                    final int finalI = i;
+                    uploadTask = (UploadTask) fileReference.putFile(uriImg)
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+
+                                }
+                            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                         @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            User mUser = dataSnapshot.getValue(User.class);
+                                        public void onSuccess(Uri uri) {
+                                            final Uri downloadUrl = uri;
+                                            imgFileUrl.add(downloadUrl.toString());
+                                            if (finalI == imgFilesUri.size() - 1){
+                                                //upfile
+                                                if (filesUri.size()==0){
+                                                    if(filesUri.size()==0){
+                                                        HashMap<String, Object> hashMap = new HashMap<>();
+                                                        hashMap.put("uId", user.getUid());
+                                                        hashMap.put("usId", listToString(memberUid));
+                                                        hashMap.put("tasksId", "");
+                                                        hashMap.put("title", proName);
+                                                        hashMap.put("des", proDes);
+                                                        hashMap.put("timestamp", new Timestamp(System.currentTimeMillis()).toString());
+                                                        hashMap.put("image", "https://");
+                                                        hashMap.put("files", listToString(fileUrl));
+                                                        hashMap.put("imgFiles", listToString(imgFileUrl)); //lấy sau
+                                                        hashMap.put("status", 0);
 
-                                            HashMap<String, Object> hashMapU = new HashMap<>();
-                                            hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+                                                        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                                        DatabaseReference reference = firebaseDatabase.getReference("Projects");
+                                                        keyPro = reference.push().getKey();
+                                                        hashMap.put("id", keyPro);
+                                                        reference.child(keyPro).setValue(hashMap);
 
-                                            referenceU.child(uId).updateChildren(hashMapU);
-                                        }
+                                                        final DatabaseReference referenceU = firebaseDatabase.getReference("Users");
+                                                        referenceU.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                            @Override
+                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                User mUser = dataSnapshot.getValue(User.class);
+                                                                HashMap<String, Object> hashMapU = new HashMap<>();
+                                                                hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+                                                                referenceU.child(user.getUid()).updateChildren(hashMapU);
+                                                                // up usID
+                                                                if (memberUid.size() == 0){
+                                                                    sweetAlertDialog.dismiss();
+                                                                    finish();
+                                                                } else {
+                                                                    for (int k = 0; k< memberUid.size();k++){
+                                                                        final String uId = memberUid.get(k);
+                                                                        final int finalK = k;
+                                                                        referenceU.child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                            @Override
+                                                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                User mUser = dataSnapshot.getValue(User.class);
 
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                                                HashMap<String, Object> hashMapU = new HashMap<>();
+                                                                                hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
 
+                                                                                referenceU.child(uId).updateChildren(hashMapU);
+
+                                                                                if(finalK == memberUid.size()-1){
+                                                                                    sweetAlertDialog.dismiss();
+                                                                                    finish();
+                                                                                }
+                                                                            }
+
+                                                                            @Override
+                                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                            }
+                                                                        });
+                                                                    }
+                                                                }
+                                                            }
+                                                            @Override
+                                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                            }
+                                                        });
+                                                } else {
+                                                        for(int j =0;j< filesUri.size();j++){
+                                                            Uri urifile = filesUri.get(j);
+                                                            if(urifile != null){
+                                                                final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(urifile));
+                                                                final int finalJ = j;
+                                                                uploadTask = (UploadTask) fileReference.putFile(urifile)
+                                                                        .addOnFailureListener(new OnFailureListener() {
+                                                                            @Override
+                                                                            public void onFailure(@NonNull Exception e) {
+
+                                                                            }
+                                                                        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                                            @Override
+                                                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                                                fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                                                    @Override
+                                                                                    public void onSuccess(Uri uri) {
+                                                                                        final Uri downloadUrl = uri;
+
+                                                                                        fileUrl.add(downloadUrl.toString());
+                                                                                        if (finalJ == filesUri.size()-1){
+                                                                                            HashMap<String, Object> hashMap = new HashMap<>();
+                                                                                            hashMap.put("uId", user.getUid());
+                                                                                            hashMap.put("usId", listToString(memberUid));
+                                                                                            hashMap.put("tasksId", "");
+                                                                                            hashMap.put("title", proName);
+                                                                                            hashMap.put("des", proDes);
+                                                                                            hashMap.put("timestamp", new Timestamp(System.currentTimeMillis()).toString());
+                                                                                            hashMap.put("image", "https://");
+                                                                                            hashMap.put("files", listToString(fileUrl));
+                                                                                            hashMap.put("imgFiles", listToString(imgFileUrl)); //lấy sau
+                                                                                            hashMap.put("status", 0);
+
+                                                                                            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                                                                                            DatabaseReference reference = firebaseDatabase.getReference("Projects");
+                                                                                            keyPro = reference.push().getKey();
+                                                                                            hashMap.put("id", keyPro);
+                                                                                            reference.child(keyPro).setValue(hashMap);
+
+                                                                                            final DatabaseReference referenceU = firebaseDatabase.getReference("Users");
+                                                                                            referenceU.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                                @Override
+                                                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                                    User mUser = dataSnapshot.getValue(User.class);
+                                                                                                    HashMap<String, Object> hashMapU = new HashMap<>();
+                                                                                                    hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+                                                                                                    referenceU.child(user.getUid()).updateChildren(hashMapU);
+                                                                                                    // up usID
+                                                                                                    if (memberUid.size() == 0){
+                                                                                                        sweetAlertDialog.dismiss();
+                                                                                                        finish();
+                                                                                                    } else {
+                                                                                                        for (int k = 0; k< memberUid.size();k++){
+                                                                                                            final String uId = memberUid.get(k);
+                                                                                                            final int finalK = k;
+                                                                                                            referenceU.child(uId).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                                                @Override
+                                                                                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                                                    User mUser = dataSnapshot.getValue(User.class);
+
+                                                                                                                    HashMap<String, Object> hashMapU = new HashMap<>();
+                                                                                                                    hashMapU.put("projects", mUser.getProjects() + "|" + keyPro);
+
+                                                                                                                    referenceU.child(uId).updateChildren(hashMapU);
+
+                                                                                                                    if(finalK == memberUid.size()-1){
+                                                                                                                        sweetAlertDialog.dismiss();
+                                                                                                                        finish();
+                                                                                                                    }
+                                                                                                                }
+
+                                                                                                                @Override
+                                                                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                                                }
+                                                                                                            });
+                                                                                                        }
+                                                                                                    }
+                                                                                                }
+                                                                                                @Override
+                                                                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                                }
+                                                                                            });
+                                                                                        }
+                                                                                    }
+                                                                                });
+                                                                            }
+                                                                        });
+                                                            }
+                                                        }
+                                                    }
+
+                                                }
+
+                                            }
                                         }
                                     });
                                 }
-
-                                sweetAlertDialog.dismiss();
-
-                                Intent intent = new Intent(AddProjectActivity.this, DashboardActivity.class);
-                                startActivity(intent);
-                                finish();
-                            }
-                            }
-                        });
-                        }
-                    });
+                            });
+                }
             }
         }
 

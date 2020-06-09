@@ -16,7 +16,11 @@
                 android:orderInCategory="100"
                 android:title="File đính kèm"
                 app:showAsAction="never" />
-
+            <item
+                android:id="@+id/action_changeImg"
+                android:orderInCategory="100"
+                android:title="Đổi hình"
+                app:showAsAction="never" />
         </menu>
 
     </item>

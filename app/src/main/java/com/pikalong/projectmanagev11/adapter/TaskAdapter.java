@@ -8,9 +8,18 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pikalong.projectmanagev11.R;
 import com.pikalong.projectmanagev11.model.Project;
 import com.pikalong.projectmanagev11.model.Task;
+import com.pikalong.projectmanagev11.model.User;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -57,7 +66,7 @@ public class TaskAdapter extends BaseAdapter {
             taskViewHolder.img = view.findViewById(R.id.img_task);
 
             Task task = tasks.get(i);
-            taskViewHolder.name.setText(task.getUid());
+            taskViewHolder.name.setText(task.getLeadName());
             taskViewHolder.time.setText(task.getTimestamp());
             taskViewHolder.title.setText(task.getTitle());
             taskViewHolder.des.setText(task.getDes());
@@ -69,7 +78,7 @@ public class TaskAdapter extends BaseAdapter {
         }
         else {
             Task task = tasks.get(i);
-            taskViewHolder.name.setText(task.getUid());
+            taskViewHolder.name.setText(task.getLeadName());
             taskViewHolder.time.setText(task.getTimestamp());
             taskViewHolder.title.setText(task.getTitle());
             taskViewHolder.des.setText(task.getDes());

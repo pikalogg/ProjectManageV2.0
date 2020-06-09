@@ -4,17 +4,19 @@ import java.sql.Time;
 
 public class Task {
     String id;
-    String uid;
+    String uId;
     String usId;
     String projectId;
+    String leadName;
     String title, des, image, timestamp, files, imgFiles;
     int status;
 
-    public Task(String id, String uid, String usId, String projectId, String title, String des, String image, String timestamp, String files, String imgFiles, int status) {
+    public Task(String id, String uId, String usId, String projectId, String leadName, String title, String des, String image, String timestamp, String files, String imgFiles, int status) {
         this.id = id;
-        this.uid = uid;
+        this.uId = uId;
         this.usId = usId;
         this.projectId = projectId;
+        this.leadName = leadName;
         this.title = title;
         this.des = des;
         this.image = image;
@@ -35,6 +37,70 @@ public class Task {
         this.id = id;
     }
 
+    public String getuId() {
+        return uId;
+    }
+
+    public void setuId(String uId) {
+        this.uId = uId;
+    }
+
+    public String getUsId() {
+        return usId;
+    }
+
+    public void setUsId(String usId) {
+        this.usId = usId;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getLeadName() {
+        return leadName;
+    }
+
+    public void setLeadName(String leadName) {
+        this.leadName = leadName;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDes() {
+        return des;
+    }
+
+    public void setDes(String des) {
+        this.des = des;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
+    }
+
     public String getFiles() {
         return files;
     }
@@ -51,64 +117,8 @@ public class Task {
         this.imgFiles = imgFiles;
     }
 
-    public String getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public String getUid() {
-        return uid;
-    }
-
-    public String getUsId() {
-        return usId;
-    }
-
-    public String getProjectId() {
-        return projectId;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public String getDes() {
-        return des;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
     public int getStatus() {
         return status;
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public void setUsId(String usId) {
-        this.usId = usId;
-    }
-
-    public void setProjectId(String projectId) {
-        this.projectId = projectId;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public void setDes(String des) {
-        this.des = des;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
 
     public void setStatus(int status) {

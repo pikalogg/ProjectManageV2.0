@@ -1,5 +1,6 @@
 package com.pikalong.projectmanagev11;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -21,24 +22,29 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
 import com.pikalong.projectmanagev11.adapter.TaskAdapter;
 import com.pikalong.projectmanagev11.model.Project;
 import com.pikalong.projectmanagev11.model.Task;
+import com.pikalong.projectmanagev11.model.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class ProjectActivity extends AppCompatActivity {
     ActionBar actionBar;
-    Intent intent;
 
     int in = 0;
     ListView listView;
     TextView btn_gv, btn_dl, btn_kt, btn_ht;
     LinearLayout l_tmp, l_tmp2;
 
-    List<Task> tasks;
     List<Task> tasks_gv;
     List<Task> tasks_dl;
     List<Task> tasks_kt;
@@ -50,29 +56,40 @@ public class ProjectActivity extends AppCompatActivity {
 
     ImageButton btn_add;
 
-    Bundle bundle;
-
+    Project mProject;
+//    User mUser, leadUser;
     FirebaseUser user;
+
+    Intent mIntent;
+    FirebaseDatabase firebaseDatabase;
+    DatabaseReference reference;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_project);
-        addControl();
-        addEvent();
-        addData();
+
     }
 
     private void addControl(){
-        intent = getIntent();
-        bundle = intent.getExtras();
+        in = 0;
+        tasks_gv = new ArrayList<>();
+        tasks_dl = new ArrayList<>();
+        tasks_kt = new ArrayList<>();
+        tasks_ht = new ArrayList<>();
 
-        actionBar = getSupportActionBar();
-        actionBar.setTitle(bundle.getString("title", ""));
-        actionBar.setDisplayHomeAsUpEnabled(true);
+        taskAdapter_gv = new TaskAdapter(tasks_gv, getApplicationContext());
+        taskAdapter_dl = new TaskAdapter(tasks_dl, getApplicationContext());
+        taskAdapter_kt = new TaskAdapter(tasks_kt, getApplicationContext());
+        taskAdapter_ht = new TaskAdapter(tasks_ht, getApplicationContext());
 
-        user = FirebaseAuth.getInstance().getCurrentUser();
 
         listView = findViewById(R.id.lv_conten);
+
+
+
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+
         btn_gv = findViewById(R.id.btn_giaoviec);
         btn_dl = findViewById(R.id.btn_danglam);
         btn_kt = findViewById(R.id.btn_kiemtra);
@@ -83,9 +100,97 @@ public class ProjectActivity extends AppCompatActivity {
 
         btn_add = findViewById(R.id.btn_add);
 
-        if(!user.getUid().equals(bundle.getString("uId","")) || bundle.getInt("status", 0) == 1){
-            btn_add.setVisibility(View.GONE);
-        }
+        mIntent = getIntent();
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
+
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        reference = firebaseDatabase.getReference("Projects").child(mIntent.getStringExtra("id"));
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mProject = dataSnapshot.getValue(Project.class);
+
+                actionBar.setTitle(mProject.getTitle());
+                if(!user.getUid().equals(mProject.getUid()) || mProject.getStatus() == 1){
+                    btn_add.setVisibility(View.GONE);
+                }
+
+                String tasksId = mProject.getTasksId();
+                final List<String> listTasks = stringToList(tasksId);
+
+//                Toast.makeText(getBaseContext(), listTasks.size() + "", Toast.LENGTH_LONG).show();
+                DatabaseReference referenceTask = firebaseDatabase.getReference("Tasks");
+
+                for (int i = 0 ; i < listTasks.size(); i++){
+                    String taskId = listTasks.get(i);
+                    final int finalI = i;
+                    referenceTask.child(taskId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Task taskTmp = dataSnapshot.getValue(Task.class);
+                            if (taskTmp.getStatus() == 0) {
+                                tasks_gv.add(taskTmp);
+                                taskAdapter_gv.notifyDataSetChanged();
+                            }
+                            if (taskTmp.getStatus() == 1) {
+                                tasks_dl.add(taskTmp);
+                                taskAdapter_dl.notifyDataSetChanged();
+                            }
+                            if (taskTmp.getStatus() == 2) {
+                                tasks_kt.add(taskTmp);
+                                taskAdapter_kt.notifyDataSetChanged();
+                            }
+                            if (taskTmp.getStatus() == 3) {
+                                tasks_ht.add(taskTmp);
+                                taskAdapter_ht.notifyDataSetChanged();
+                            }
+
+                            if(finalI == listTasks.size()-1){
+                                listView.setAdapter(taskAdapter_gv);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+
+//                DatabaseReference referenceUser = firebaseDatabase.getReference("Users");
+//                referenceUser.child(user.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        mUser = dataSnapshot.getValue(User.class);
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+//                referenceUser.child(mProject.getUid()).addListenerForSingleValueEvent(new ValueEventListener() {
+//                    @Override
+//                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                        leadUser = dataSnapshot.getValue(User.class);
+//
+//                    }
+//
+//                    @Override
+//                    public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//                    }
+//                });
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+
+
     }
     private void addEvent(){
         btn_gv.setOnClickListener(new View.OnClickListener() {
@@ -128,108 +233,57 @@ public class ProjectActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(ProjectActivity.this, AddTaskActivity.class);
+                intent.putExtra("projectId", mProject.getId());
                 startActivity(intent);
 //                finish();
             }
         });
+
+
+        /////////////////
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent myIntent = null;
+                switch (in){
+                    case 0:
+                        /// mUser == leaderUser
+                        myIntent = new Intent(ProjectActivity.this, GiveTaskActivity.class);
+                        break;
+                    //                    case 1:
+                    //                        myIntent = new Intent(ProjectActivity.this, DeployingTaskActivity.class);
+                    //                        myIntent.putExtra("name", tasks_dl.get(i).getName());
+                    //                        myIntent.putExtra("title", tasks_dl.get(i).getTitle());
+                    //                        myIntent.putExtra("des", tasks_dl.get(i).getDes());
+                    //                        break;
+                    //                    case 2:
+                    //                        myIntent = new Intent(ProjectActivity.this, InspectTaskActivity.class);
+                    //                        myIntent.putExtra("name", tasks_kt.get(i).getNameSu());
+                    //                        myIntent.putExtra("title", tasks_kt.get(i).getTitle());
+                    //                        myIntent.putExtra("des", tasks_kt.get(i).getDes());
+                    //                        break;
+                    //                    case 3:
+                    //                        myIntent = new Intent(ProjectActivity.this, SuccessfulTaskActivity.class);
+                    //                        myIntent.putExtra("name", tasks_ht.get(i).getNameSu());
+                    //                        myIntent.putExtra("title", tasks_ht.get(i).getTitle());
+                    //                        myIntent.putExtra("des", tasks_ht.get(i).getDes());
+                    //                        break;
+                    //                    default:
+                    //                        break;
+                }
+                startActivity(myIntent);
+            }
+        });
     }
 
-    private  void addData(){
-        tasks = new ArrayList<>();
-        tasks_gv = new ArrayList<>();
-        tasks_dl = new ArrayList<>();
-        tasks_kt = new ArrayList<>();
-        tasks_ht = new ArrayList<>();
-//        //gv
-//        tasks.add(new Task("công việc cao cả", "đứng im một chỗ"));
-//        tasks.add(new Task("công việc bần hàn", "đi qua đi lại"));
-//        tasks.add(new Task());
-//        tasks.add(new Task());
-//        //dl
-//        tasks.add(new Task("Kiểm tra chính tả", "Bạn sửa lỗi, nhưng bạn đã mất mạch ý tưởng. Để tránh sự ngắt quãng đó, bạn có thể tắt kiểm tra chính tả, rồi kiểm tra chính tả bằng cách thủ công khi bạn đã viết xong. Đây là cách thực hiện.", 1));
-//        tasks.add(new Task("Làm slide thuyết trính", "Ngay trong PowerPoint có rất nhiều mẫu theme, hình nền PowerPoint để chúng ta lựa chọn. Mỗi một hình nền đều theo nhiều chủ đề khác nhau, bạn nên lựa chọn hình nền phù hợp với nội dung cũng như đối tượng trình chiếu.", 1));
-//        //kt
-//        Task tmp1 = new Task("Mẫu để kiểm tra", "không làm gì", 2);
-//        tmp1.setNameSu("Vũ Thị Ngọc Lê");
-//        tasks.add(tmp1);
-//
-//        //ht
-//        Task tmp2 = new Task("Mẫu để kiểm tra hoàn thành", "không làm gì", 3);
-//        tmp2.setNameSu("Vũ Thị Ngọc Lê");
-//        tasks.add(tmp2);
-//
 
-//
-//        for (int i=0;i<tasks.size();i++){
-//            Task task = tasks.get(i);
-//            switch (task.getStatus()){
-//                case 0:
-//                    tasks_gv.add(task);
-//                    break;
-//                case 1:
-//                    tasks_dl.add(task);
-//                    break;
-//                case 2:
-//                    tasks_kt.add(task);
-//                    break;
-//                case 3:
-//                    tasks_ht.add(task);
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//
-        taskAdapter_gv = new TaskAdapter(tasks_gv, getApplicationContext());
-        taskAdapter_dl = new TaskAdapter(tasks_dl, getApplicationContext());
-        taskAdapter_kt = new TaskAdapter(tasks_kt, getApplicationContext());
-        taskAdapter_ht = new TaskAdapter(tasks_ht, getApplicationContext());
-
-        listView.setAdapter(taskAdapter_gv);
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-//                Intent myIntent = null;
-//                switch (in){
-//                    case 0:
-//                        myIntent = new Intent(ProjectActivity.this, GiveTaskActivity.class);
-//                        myIntent.putExtra("name", tasks_gv.get(i).getName());
-//                        myIntent.putExtra("title", tasks_gv.get(i).getTitle());
-//                        myIntent.putExtra("des", tasks_gv.get(i).getDes());
-//                        break;
-//                    case 1:
-//                        myIntent = new Intent(ProjectActivity.this, DeployingTaskActivity.class);
-//                        myIntent.putExtra("name", tasks_dl.get(i).getName());
-//                        myIntent.putExtra("title", tasks_dl.get(i).getTitle());
-//                        myIntent.putExtra("des", tasks_dl.get(i).getDes());
-//                        break;
-//                    case 2:
-//                        myIntent = new Intent(ProjectActivity.this, InspectTaskActivity.class);
-//                        myIntent.putExtra("name", tasks_kt.get(i).getNameSu());
-//                        myIntent.putExtra("title", tasks_kt.get(i).getTitle());
-//                        myIntent.putExtra("des", tasks_kt.get(i).getDes());
-//                        break;
-//                    case 3:
-//                        myIntent = new Intent(ProjectActivity.this, SuccessfulTaskActivity.class);
-//                        myIntent.putExtra("name", tasks_ht.get(i).getNameSu());
-//                        myIntent.putExtra("title", tasks_ht.get(i).getTitle());
-//                        myIntent.putExtra("des", tasks_ht.get(i).getDes());
-//                        break;
-//                    default:
-//                        break;
-//                }
-//                myIntent.putExtra("namePro", intent.getStringExtra("namePro"));
-//                startActivity(myIntent);
-//            }
-//        });
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
 
-        if(user.getUid().equals(bundle.getString("uId",""))){
-            if(bundle.getInt("status", 0) == 0){
+        if(user.getUid().equals(mIntent.getStringExtra("leadId"))){
+            if(mIntent.getIntExtra("status", 0) == 0){
                 getMenuInflater().inflate(R.menu.menu_pro_leader, menu);
             } else {
                 getMenuInflater().inflate(R.menu.menu_pro_leader_kt, menu);
@@ -247,6 +301,12 @@ public class ProjectActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        HashMap<String, Object> hashMapPro = new HashMap<>();
+        DatabaseReference referencePro = firebaseDatabase.getReference("Projects");
+
+        Intent intentT;
+
         //noinspection SimplifiableIfStatement
         switch(id){
             case android.R.id.home:
@@ -254,7 +314,19 @@ public class ProjectActivity extends AppCompatActivity {
                 return true;
                 ///////////////// action #
 
+            case R.id.action_return:
+                hashMapPro.put("status", 1);
+                referencePro.child(mProject.getId()).updateChildren(hashMapPro);
 
+                finish();
+                return true;
+
+            case R.id.action_continue:
+                hashMapPro.put("status", 0);
+                referencePro.child(mProject.getId()).updateChildren(hashMapPro);
+
+                finish();
+                return true;
             default:
                 break;
         }
@@ -263,8 +335,35 @@ public class ProjectActivity extends AppCompatActivity {
     //nut back dt
     @Override
     public void onBackPressed() {
-        intent = new Intent(ProjectActivity.this, DashboardActivity.class);
-        startActivity(intent);
+//        Intent intentT = new Intent(ProjectActivity.this, DashboardActivity.class);
+//        startActivity(intentT);
         finish();
+    }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        addControl();
+        addEvent();
+    }
+
+    ///////////////////////////////
+    private String listToString(List<String> mLists){
+        String conten = "";
+        for (String str : mLists){
+            conten += str + "|";
+        }
+        return  conten;
+    }
+
+    private  List<String> stringToList(String mStr){
+        List<String> mLists = new ArrayList<>();
+        String[] strs = mStr.split("\\|");
+        for (String str : strs){
+            if(!str.equals(""))
+                mLists.add(str);
+        }
+        return  mLists;
     }
 }

@@ -261,8 +261,8 @@ public class UpdateProfileActivyty extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(UpdateProfileActivyty.this, DashboardActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(UpdateProfileActivyty.this, DashboardActivity.class);
+//        startActivity(intent);
         finish();
     }
     ////////////// choie img

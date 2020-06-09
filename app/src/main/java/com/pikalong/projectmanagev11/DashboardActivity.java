@@ -69,6 +69,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
     boolean inDang = true;
 
+    FirebaseDatabase firebaseDatabase;
     FirebaseAuth firebaseAuth;
     FirebaseUser firebaseUser;
     User mUser;
@@ -79,13 +80,86 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
-        addControl();
-        addEvent();
-        addData();
     }
 
     private void addControl(){
+        inDang = true;
+        projects_dang = new ArrayList<>();
+        projects_da = new ArrayList<>();
+        projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
+        projectAdapter_da = new ProjectAdapter(projects_da , getApplicationContext());
 
+        listView = findViewById(R.id.listview);
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        firebaseUser = firebaseAuth.getCurrentUser();
+
+        if(firebaseUser == null){
+            Intent intent = new Intent(DashboardActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        }
+
+        String uid = firebaseUser.getUid();
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        DatabaseReference reference = firebaseDatabase.getReference("Users").child(uid);
+
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                mUser = dataSnapshot.getValue(User.class);
+                tvMemName.setText(mUser.getName());
+                tvMemId.setText("ID: " + mUser.getUid());
+
+                if(mUser.getImage().equals("")){
+                    Picasso.get().load(R.drawable.default_avatar).into(imgAva);
+                }
+                else {
+                    Picasso.get().load(mUser.getImage()).into(imgAva);
+                }
+
+                if(mUser.getCover().equals("")){
+                    Picasso.get().load(R.drawable.defause_bgr).into(imgCover);
+                }
+                else {
+                    Picasso.get().load(mUser.getCover()).into(imgCover);
+                }
+                DatabaseReference referenceP = firebaseDatabase.getReference("Projects");
+                final List<String> projects = stringToList(mUser.getProjects());
+
+//                Toast.makeText(getBaseContext(), projects.size() + "", Toast.LENGTH_LONG).show();
+                for(int i = 0; i < projects.size();i++){
+                    String project = projects.get(i);
+                    final int finalI = i;
+                    referenceP.child(project).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            Project projectTemp = dataSnapshot.getValue(Project.class);
+                            if (projectTemp.getStatus() == 0) {
+                                projects_dang.add(projectTemp);
+                                projectAdapter_dang.notifyDataSetChanged();
+                            }
+                            if (projectTemp.getStatus() == 1) {
+                                projects_da.add(projectTemp);
+                                projectAdapter_da.notifyDataSetChanged();
+                            }
+
+                            if(finalI == projects.size()-1){
+                                listView.setAdapter(projectAdapter_dang);
+                            }
+                        }
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
 
         actionBar = getSupportActionBar();
         actionBar.setTitle("Quản lý dự án");
@@ -104,7 +178,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
 
         btn_da = findViewById(R.id.btn_da);
         btn_dang = findViewById(R.id.btn_dang);
-        listView = findViewById(R.id.listview);
         l_tmp = findViewById(R.id.l_tmp);
 
         btn_add = findViewById(R.id.btn_add);
@@ -115,15 +188,7 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         imgAva = navigationView.getHeaderView(0).findViewById(R.id.imgAva);
         imgCover = navigationView.getHeaderView(0).findViewById(R.id.imgCover);
 
-        firebaseAuth = FirebaseAuth.getInstance();
-        firebaseUser = firebaseAuth.getCurrentUser();
 
-        if(firebaseUser == null){
-            Intent intent = new Intent(DashboardActivity.this, LoginActivity.class);
-            startActivity(intent);
-            finish();
-        }
-        mUser = null;
 
     }
     private void addEvent(){
@@ -152,117 +217,31 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             public void onClick(View view) {
                 Intent intent = new Intent(DashboardActivity.this, AddProjectActivity.class);
                 startActivity(intent);
-                finish();
             }
         });
 
 
         /////////////////////////
-
-    }
-
-    private  void addData(){
-        projects_dang = new ArrayList<>();
-        projects_da = new ArrayList<>();
-        projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
-        projectAdapter_da = new ProjectAdapter(projects_da , getApplicationContext());
-
-        listView.setAdapter(projectAdapter_dang);
-        String uid = firebaseUser.getUid();
-        final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference reference = firebaseDatabase.getReference("Users").child(uid);
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                mUser = dataSnapshot.getValue(User.class);
-                tvMemName.setText(mUser.getName());
-                tvMemId.setText("ID: " + mUser.getUid());
-
-                if(mUser.getImage().equals("")){
-                    Picasso.get().load(R.drawable.default_avatar).into(imgAva);
-                }
-                else {
-                    Picasso.get().load(mUser.getImage()).into(imgAva);
-                }
-
-                if(mUser.getCover().equals("")){
-                    Picasso.get().load(R.drawable.defause_bgr).into(imgCover);
-                }
-                else {
-                    Picasso.get().load(mUser.getCover()).into(imgCover);
-                }
-
-
-                DatabaseReference referenceP = firebaseDatabase.getReference("Projects");
-                List<String> projects = stringToList(mUser.getProjects());
-//
-                for(final String project : projects){
-                    referenceP.child(project).addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            Project projectTemp = dataSnapshot.getValue(Project.class);
-                            if (projectTemp.getStatus() == 0) {
-                                projects_dang.add(projectTemp);
-                                projectAdapter_dang.notifyDataSetChanged();
-                            }
-                            if (projectTemp.getStatus() == 1) {
-                                projects_da.add(projectTemp);
-                                projectAdapter_da.notifyDataSetChanged();
-                            }
-                        }
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-
-
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent intent = new Intent(DashboardActivity.this, ProjectActivity.class);
                 if(inDang){
-                    Bundle bundle = new Bundle();
-                    bundle.putString("Id", projects_dang.get(i).getId());
-                    bundle.putString("uId", projects_dang.get(i).getUid());
-                    bundle.putString("usId", projects_dang.get(i).getUsId());
-                    bundle.putString("tasksId", projects_dang.get(i).getTasksId());
-                    bundle.putString("title", projects_dang.get(i).getTitle());
-                    bundle.putString("des", projects_dang.get(i).getDes());
-                    bundle.putString("image", projects_dang.get(i).getImage());
-                    bundle.putString("files", projects_dang.get(i).getFiles());
-                    bundle.putString("imgFiles", projects_dang.get(i).getImage());
-                    bundle.putInt("status", projects_dang.get(i).getStatus());
-                    intent.putExtras(bundle);
+                    intent.putExtra("id", projects_dang.get(i).getId());
+                    intent.putExtra("leadId", projects_dang.get(i).getUid());
+                    intent.putExtra("status", projects_dang.get(i).getStatus());
 
                 } else {
-                    Bundle bundle = new Bundle();
-                    bundle.putString("Id", projects_da.get(i).getId());
-                    bundle.putString("uId", projects_da.get(i).getUid());
-                    bundle.putString("usId", projects_da.get(i).getUsId());
-                    bundle.putString("tasksId", projects_da.get(i).getTasksId());
-                    bundle.putString("title", projects_da.get(i).getTitle());
-                    bundle.putString("des", projects_da.get(i).getDes());
-                    bundle.putString("image", projects_da.get(i).getImage());
-                    bundle.putString("files", projects_da.get(i).getFiles());
-                    bundle.putString("imgFiles", projects_da.get(i).getImage());
-                    bundle.putInt("status", projects_da.get(i).getStatus());
-                    intent.putExtras(bundle);
-
+                    intent.putExtra("id", projects_da.get(i).getId());
+                    intent.putExtra("leadId", projects_da.get(i).getUid());
+                    intent.putExtra("status", projects_da.get(i).getStatus());
                 }
                 startActivity(intent);
-                finish();
             }
         });
+
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId())
@@ -292,7 +271,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
             case R.id.drawerProfile:
                 intent = new Intent(DashboardActivity.this, UpdateProfileActivyty.class);
                 startActivity(intent);
-                finish();
                 break;
 
 
@@ -326,6 +304,15 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
         }
         return false;
     }
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        addControl();
+        addEvent();
+    }
+
     ///////////////////////////////
     private String listToString(List<String> mLists){
         String conten = "";

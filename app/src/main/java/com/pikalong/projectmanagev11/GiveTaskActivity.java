@@ -11,7 +11,7 @@ import android.widget.TextView;
 
 public class GiveTaskActivity extends AppCompatActivity {
     ActionBar actionBar;
-    TextView tv_name, tv_des;
+
 
     Intent intent;
     @Override
@@ -26,12 +26,9 @@ public class GiveTaskActivity extends AppCompatActivity {
 
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle(intent.getStringExtra("title"));
+        actionBar.setTitle(intent.getStringExtra("leadName"));
 
-        tv_name = findViewById(R.id.tv_name);
-        tv_name.setText(intent.getStringExtra("name"));
-        tv_des = findViewById(R.id.tv_des);
-        tv_des.setText(intent.getStringExtra("des"));
+
     }
     private void addEvent(){
 
@@ -54,7 +51,8 @@ public class GiveTaskActivity extends AppCompatActivity {
     //nut back dt
     @Override
     public void onBackPressed() {
-//        super.onBackPressed();
+//        Intent intentT = new Intent(GiveTaskActivity.this, ProjectActivity.class);
+//        startActivity(intentT);
         finish();
     }
 }
