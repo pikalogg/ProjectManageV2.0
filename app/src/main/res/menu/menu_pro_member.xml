@@ -11,12 +11,6 @@
                 android:title="Chi tiết"
                 app:showAsAction="never" />
 
-            <item
-                android:id="@+id/action_file"
-                android:orderInCategory="100"
-                android:title="File đính kèm"
-                app:showAsAction="never" />
-
         </menu>
 
     </item>
@@ -38,5 +32,10 @@
         </menu>
 
     </item>
+    <item
+        android:id="@+id/action_messenger"
+        android:orderInCategory="100"
+        android:title="Thảo luận nhóm"
+        app:showAsAction="never" />
 
 </menu>

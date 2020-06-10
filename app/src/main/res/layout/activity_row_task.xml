@@ -73,6 +73,8 @@
                 android:id="@+id/tv_des"
                 android:layout_width="match_parent"
                 android:layout_height="55dp"
+                android:ellipsize="end"
+                android:maxLines="3"
                 android:textColor="#718A99"
                 android:layout_weight="6" />
 

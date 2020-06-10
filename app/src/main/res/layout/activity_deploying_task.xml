@@ -213,7 +213,7 @@
             android:gravity="center"
             android:orientation="vertical">
             <Button
-                android:id="@+id/button_y"
+                android:id="@+id/btnDep"
                 android:layout_width="296dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"

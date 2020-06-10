@@ -156,9 +156,9 @@ public class RegisterActivity extends AppCompatActivity {
                             reference.child(uid).setValue(hashMap);
 
                             sweetAlertDialog.dismiss();
-                            Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
+                            Intent intent = new Intent(RegisterActivity.this, DashboardActivity.class);
                             startActivity(intent);
-
+                            finish();
                         }
                         else
                         {

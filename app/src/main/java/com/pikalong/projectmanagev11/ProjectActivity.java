@@ -5,13 +5,17 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -20,6 +24,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -27,6 +32,10 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+import com.pikalong.projectmanagev11.adapter.MemberBoxAdapter;
 import com.pikalong.projectmanagev11.adapter.ProjectAdapter;
 import com.pikalong.projectmanagev11.adapter.TaskAdapter;
 import com.pikalong.projectmanagev11.model.Project;
@@ -37,7 +46,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 public class ProjectActivity extends AppCompatActivity {
+    private static final int PICK_IMG_FILE = 301;
     ActionBar actionBar;
 
     int in = 0;
@@ -53,6 +65,8 @@ public class ProjectActivity extends AppCompatActivity {
     TaskAdapter taskAdapter_dl;
     TaskAdapter taskAdapter_kt;
     TaskAdapter taskAdapter_ht;
+
+    SweetAlertDialog sweetAlertDialog;
 
     ImageButton btn_add;
 
@@ -84,7 +98,7 @@ public class ProjectActivity extends AppCompatActivity {
 
         listView = findViewById(R.id.lv_conten);
 
-
+        sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
 
         actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -129,16 +143,20 @@ public class ProjectActivity extends AppCompatActivity {
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             Task taskTmp = dataSnapshot.getValue(Task.class);
                             if (taskTmp.getStatus() == 0) {
-                                tasks_gv.add(taskTmp);
-                                taskAdapter_gv.notifyDataSetChanged();
+                                if(mProject.getUid().equals(user.getUid())){
+                                    tasks_gv.add(taskTmp);
+                                    taskAdapter_gv.notifyDataSetChanged();
+                                }
                             }
                             if (taskTmp.getStatus() == 1) {
                                 tasks_dl.add(taskTmp);
                                 taskAdapter_dl.notifyDataSetChanged();
                             }
                             if (taskTmp.getStatus() == 2) {
-                                tasks_kt.add(taskTmp);
-                                taskAdapter_kt.notifyDataSetChanged();
+                                if (mProject.getUid().equals(user.getUid())){
+                                    tasks_kt.add(taskTmp);
+                                    taskAdapter_kt.notifyDataSetChanged();
+                                }
                             }
                             if (taskTmp.getStatus() == 3) {
                                 tasks_ht.add(taskTmp);
@@ -248,30 +266,80 @@ public class ProjectActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 if(mProject.getStatus() == 0){
                     Intent myIntent = null;
-                    switch (in){
-                        case 0:
-                            /// mUser == leaderUser
-                            myIntent = new Intent(ProjectActivity.this, GiveTaskActivity.class);
-                            myIntent.putExtra("taskId", tasks_gv.get(i).getId());
-                            break;
-                        case 1:
-                            myIntent = new Intent(ProjectActivity.this, DeployingTaskActivity.class);
-                            myIntent.putExtra("taskId", tasks_dl.get(i).getId());
-                            break;
-                        case 2:
-                            myIntent = new Intent(ProjectActivity.this, InspectTaskActivity.class);
-                            break;
-                        case 3:
-                            myIntent = new Intent(ProjectActivity.this, SuccessfulTaskActivity.class);
-                            break;
-                        default:
-                            break;
+                    if(in==0){
+                        myIntent = new Intent(ProjectActivity.this, GiveTaskActivity.class);
+                        myIntent.putExtra("taskId", tasks_gv.get(i).getId());
+                        startActivity(myIntent);
+                    } else if (in ==1 ){
+                        myIntent = new Intent(ProjectActivity.this, DeployingTaskActivity.class);
+                        myIntent.putExtra("taskId", tasks_dl.get(i).getId());
+
+                        if (!user.getUid().equals(tasks_dl.get(i).getUsId())) {
+                            Toast.makeText(getApplicationContext(), "Đây không phải công việc dành cho bạn", Toast.LENGTH_LONG).show();
+                        } else {
+                            startActivity(myIntent);
+                        }
+                    } else if (in ==2 ){
+                        myIntent = new Intent(ProjectActivity.this, InspectTaskActivity.class);
+                        myIntent.putExtra("taskId", tasks_kt.get(i).getId());
+                        startActivity(myIntent);
+                    } else if (in == 3){
+                        myIntent = new Intent(ProjectActivity.this, SuccessfulTaskActivity.class);
+                        myIntent.putExtra("taskId", tasks_ht.get(i).getId());
+                        startActivity(myIntent);
                     }
-                    startActivity(myIntent);
                 }
 
             }
         });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PICK_IMG_FILE && resultCode == Activity.RESULT_OK) {
+
+            if (data == null) {
+                //Display an error
+                return;
+            }
+            sweetAlertDialog.setTitleText("Đang lưu ảnh");
+            sweetAlertDialog.setContentText("Chờ.....");
+            sweetAlertDialog.show();
+
+            Uri tmpUri = data.getData();
+            FirebaseStorage firebaseStorage = FirebaseStorage.getInstance();
+            StorageReference storageReference = firebaseStorage.getReference("Uploads");
+            final StorageReference fileReference = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(tmpUri));
+            UploadTask uploadTask = (UploadTask) fileReference.putFile(tmpUri)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    fileReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            Uri downloadUri = uri;
+
+                            HashMap<String, Object> hashMap = new HashMap<>();
+                            hashMap.put("image", downloadUri.toString());
+
+                            reference.updateChildren(hashMap);
+
+                            sweetAlertDialog.dismiss();
+                        }
+                    });
+                }
+            });
+
+
+
+        }
+    }
+
+    private String getFileExtension(Uri uri){
+        ContentResolver contentResolver = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(contentResolver.getType(uri));
     }
 
 
@@ -325,6 +393,22 @@ public class ProjectActivity extends AppCompatActivity {
 
                 finish();
                 return true;
+
+            case R.id.action_changeImg:
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("image/*");
+                startActivityForResult(intent, PICK_IMG_FILE);
+                break;
+            case R.id.action_detail:
+                Intent intent1 = new Intent(ProjectActivity.this, DetailActivity.class);
+                intent1.putExtra("projectId", mProject.getId());
+                startActivity(intent1);
+                break;
+            case R.id.action_messenger:
+                Intent intent2 = new Intent(ProjectActivity.this, MessengerActivity.class);
+                intent2.putExtra("projectId", mProject.getId());
+                startActivity(intent2);
+                break;
             default:
                 break;
         }

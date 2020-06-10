@@ -14,11 +14,14 @@ import android.provider.OpenableColumns;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -35,7 +38,10 @@ import com.pikalong.projectmanagev11.model.Task;
 import com.pikalong.projectmanagev11.model.User;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class DeployingTaskActivity extends AppCompatActivity {
     private static final int PICK_IMG_FILE = 201;
@@ -43,6 +49,7 @@ public class DeployingTaskActivity extends AppCompatActivity {
     ActionBar actionBar;
 
     TextView tvName, tvTime, tvDes, tvTitle;
+    Button btnDep;
 
     ListView lvAddImgFile;
     LinearLayout llAddImgFile;
@@ -63,6 +70,7 @@ public class DeployingTaskActivity extends AppCompatActivity {
 
     Intent mIntent;
     Project mProject;
+    SweetAlertDialog sweetAlertDialog;
 
     StorageReference storageReference;
     UploadTask uploadTask;
@@ -87,6 +95,8 @@ public class DeployingTaskActivity extends AppCompatActivity {
         tvTitle = findViewById(R.id.tvTitle);
         tvTime = findViewById(R.id.tvTime);
 
+        btnDep = findViewById(R.id.btnDep);
+
         lvAddFile = findViewById(R.id.lvAddFile);
         llAddFile = findViewById(R.id.llAddFile);
         filesUri = new ArrayList<>();
@@ -98,7 +108,7 @@ public class DeployingTaskActivity extends AppCompatActivity {
         imgFilesUri = new ArrayList<>();
         imgFiles = new ArrayList<>();
         imgFileUrl = new ArrayList<>();
-
+        sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);;
 
         user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -156,6 +166,146 @@ public class DeployingTaskActivity extends AppCompatActivity {
                 startActivityForResult(intent, PICK_FILE);
             }
         });
+
+        lvAddFile.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                files.remove(i);
+                filesUri.remove(i);
+                fileUrl.remove(i);
+                fileAdapter.notifyDataSetChanged();
+
+                if (files.size() == 0) {
+                    lvAddFile.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        lvAddImgFile.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                imgFiles.remove(i);
+                imgFilesUri.remove(i);
+                imgFileUrl.remove(i);
+                imgFileAdapter.notifyDataSetChanged();
+
+                if (imgFiles.size() == 0) {
+                    lvAddImgFile.setVisibility(View.GONE);
+                }
+            }
+        });
+
+        btnDep.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                depFun();
+            }
+        });
+    }
+
+    private void depFun(){
+
+        sweetAlertDialog.setTitle("Đang tải dữ liệu lên");
+        sweetAlertDialog.setContentText("Hãy chờ...");
+        sweetAlertDialog.show();
+
+        final List<String> files = new ArrayList<>();
+        final List<String> imgFiles = new ArrayList<>();
+
+        final HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("status", 2);
+
+
+        if (filesUri.size()==0){
+            if(imgFilesUri.size()==0){
+                // khong dang gi
+//                hashMap.put("files", "");
+//                hashMap.put("imgFiles", "");
+                reference.child(mTask.getId()).updateChildren(hashMap);
+
+                sweetAlertDialog.dismiss();
+                finish();
+            } else {
+                // dang anh ma khong dang file
+
+                for (int i=0;i<imgFilesUri.size();i++){
+                    Uri imgUri = imgFilesUri.get(i);
+                    final String tmpImgUrl = System.currentTimeMillis() + getFileName(imgUri);
+                    final StorageReference fileReference = storageReference.child(tmpImgUrl);
+                    final int finalI = i;
+                    uploadTask = (UploadTask) fileReference.putFile(imgUri)
+                            .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                @Override
+                                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                    imgFiles.add(tmpImgUrl);
+
+                                    if (finalI == imgFilesUri.size()-1){
+                                        hashMap.put("imgFiles", listToString(imgFiles));
+                                        reference.child(mTask.getId()).updateChildren(hashMap);
+
+                                        sweetAlertDialog.dismiss();
+                                        finish();
+                                    }
+
+                                }
+                            });
+                }
+
+            }
+
+        }else{
+            //dang file
+            for (int indexFileUri = 0; indexFileUri < filesUri.size(); indexFileUri++){
+                Uri fileUri = filesUri.get(indexFileUri);
+                //13 chu so + ten
+                final String tmpFileUrl = System.currentTimeMillis() + getFileName(fileUri);
+                final StorageReference fileReference = storageReference.child(tmpFileUrl);
+                final int finalIndex = indexFileUri;
+                uploadTask = (UploadTask) fileReference.putFile(fileUri)
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                files.add(tmpFileUrl);
+
+                                if (finalIndex == filesUri.size()-1){
+                                    hashMap.put("files", listToString(files));
+
+                                    if(imgFilesUri.size()==0){
+                                        // dang file ma khong dang anh
+                                        reference.child(mTask.getId()).updateChildren(hashMap);
+                                        sweetAlertDialog.dismiss();
+                                        finish();
+                                    } else {
+                                        // dang ca hai
+                                        for (int i=0;i<imgFilesUri.size();i++){
+                                            Uri imgUri = imgFilesUri.get(i);
+                                            final String tmpImgUrl = System.currentTimeMillis() + getFileName(imgUri);
+                                            final StorageReference fileReference = storageReference.child(tmpImgUrl);
+                                            final int finalI = i;
+                                            uploadTask = (UploadTask) fileReference.putFile(imgUri)
+                                                    .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                                        @Override
+                                                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                            imgFiles.add(tmpImgUrl);
+
+                                                            if (finalI == imgFilesUri.size()-1){
+                                                                hashMap.put("imgFiles", listToString(imgFiles));
+                                                                reference.child(mTask.getId()).updateChildren(hashMap);
+
+                                                                sweetAlertDialog.dismiss();
+                                                                finish();
+                                                            }
+
+                                                        }
+                                                    });
+                                        }
+                                    }
+                                }
+                            }
+                        });
+            }
+
+        }
     }
 
     @Override
@@ -181,7 +331,6 @@ public class DeployingTaskActivity extends AppCompatActivity {
 
             lvAddImgFile.setVisibility(View.VISIBLE);
         }
-        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_FILE && resultCode == Activity.RESULT_OK) {
             if (data == null) {
                 //Display an error

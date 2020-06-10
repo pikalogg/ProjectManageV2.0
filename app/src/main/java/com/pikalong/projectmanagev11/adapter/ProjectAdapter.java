@@ -50,10 +50,12 @@ public class ProjectAdapter extends BaseAdapter {
             projectViewHolder = new ProjectViewHolder();
             LayoutInflater inflater = (LayoutInflater) context.getSystemService(context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.activity_row_project, null);
+
             projectViewHolder.title = view.findViewById(R.id.t_title);
             projectViewHolder.des = view.findViewById(R.id.t_des);
             projectViewHolder.time = view.findViewById(R.id.t_time);
             projectViewHolder.image = view.findViewById(R.id.img_pro);
+
             Project project = projects.get(i);
             projectViewHolder.title.setText(project.getTitle());
             projectViewHolder.des.setText(project.getDes());

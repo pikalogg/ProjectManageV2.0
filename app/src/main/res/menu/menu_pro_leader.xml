@@ -10,12 +10,6 @@
                 android:orderInCategory="100"
                 android:title="Chi tiết"
                 app:showAsAction="never" />
-
-            <item
-                android:id="@+id/action_file"
-                android:orderInCategory="100"
-                android:title="File đính kèm"
-                app:showAsAction="never" />
             <item
                 android:id="@+id/action_changeImg"
                 android:orderInCategory="100"
@@ -42,7 +36,11 @@
         </menu>
 
     </item>
-
+    <item
+        android:id="@+id/action_messenger"
+        android:orderInCategory="100"
+        android:title="Thảo luận nhóm"
+        app:showAsAction="never" />
     <item
         android:id="@+id/action_return"
         android:orderInCategory="100"

@@ -15,7 +15,6 @@ import android.os.Environment;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -35,11 +34,11 @@ import com.pikalong.projectmanagev11.model.Task;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SuccessfulTaskActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity {
     ActionBar actionBar;
     Intent intent;
 
-    TextView tvName, tvTime, tvTitle, tvDes;
+    TextView tvTitle, tvDes;
 
     StorageReference storageReference;
     FirebaseStorage firebaseStorage;
@@ -53,16 +52,21 @@ public class SuccessfulTaskActivity extends AppCompatActivity {
     List<String> filesUrl;
     FileAdapte fileAdapte;
 
-    Task mTask;
+    Project mProject;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference databaseReference;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_successful_task);
+        setContentView(R.layout.activity_detail);
         addControl();
         addEvent();
     }
+
+
+
+
+
     private void addControl(){
         intent = getIntent();
 
@@ -90,27 +94,22 @@ public class SuccessfulTaskActivity extends AppCompatActivity {
         fileAdapte = new FileAdapte(getApplicationContext(), filesUrl);
 
 
-
-        tvName = findViewById(R.id.tvName);
-        tvTime = findViewById(R.id.tvTime);
         tvTitle = findViewById(R.id.tvTitle);
         tvDes = findViewById(R.id.tvDes);
 
         firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference("Tasks");
-        databaseReference.child(intent.getStringExtra("taskId")).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference = firebaseDatabase.getReference("Projects");
+        databaseReference.child(intent.getStringExtra("projectId")).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                mTask = dataSnapshot.getValue(Task.class);
+                mProject = dataSnapshot.getValue(Project.class);
 //                Toast.makeText(getBaseContext(), mTask.getDes(), Toast.LENGTH_LONG).show();
 
-                tvName.setText(mTask.getLeadName());
-                tvTime.setText(mTask.getTimestamp());
-                tvTitle.setText(mTask.getTitle());
-                tvDes.setText(mTask.getDes());
+                tvTitle.setText(mProject.getTitle());
+                tvDes.setText(mProject.getDes());
 
-                List<String> filesTmp = stringToList(mTask.getFiles());
-                List<String> impsTamp = stringToList(mTask.getImgFiles());
+                List<String> filesTmp = stringToList(mProject.getFiles());
+                List<String> impsTamp = stringToList(mProject.getImgFiles());
 
                 for(String fileTmp : filesTmp){
                     filesUrl.add(fileTmp);
@@ -130,22 +129,8 @@ public class SuccessfulTaskActivity extends AppCompatActivity {
                     reAddImgFile.setVisibility(View.GONE);
                 }
 
+                actionBar.setTitle(mProject.getTitle());
 
-                DatabaseReference referencePro = firebaseDatabase.getReference("Projects");
-                referencePro.child(mTask.getProjectId()).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        Project project = dataSnapshot.getValue(Project.class);
-
-                        actionBar.setTitle(project.getTitle());
-
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                });
             }
 
             @Override
@@ -192,7 +177,7 @@ public class SuccessfulTaskActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Uri uri) {
                 String url = uri.toString();
-                dowloadFile(SuccessfulTaskActivity.this, child, Environment.DIRECTORY_DOWNLOADS, url);
+                dowloadFile(DetailActivity.this, child, Environment.DIRECTORY_DOWNLOADS, url);
             }
         });
 
