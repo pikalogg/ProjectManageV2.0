@@ -21,23 +21,11 @@
 
     </item>
 
-    <item android:title="Thành viên" >
-        <menu>
-            <item
-                android:id="@+id/action_addMem"
-                android:orderInCategory="100"
-                android:title="Thêm thành viên"
-                app:showAsAction="never" />
-
-            <item
-                android:id="@+id/action_listMem"
-                android:orderInCategory="100"
-                android:title="Danh sách thành viên"
-                app:showAsAction="never" />
-
-        </menu>
-
-    </item>
+    <item
+        android:id="@+id/action_listMem"
+        android:orderInCategory="100"
+        android:title="Danh sách thành viên"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/action_continue"

@@ -71,7 +71,6 @@ public class ProjectActivity extends AppCompatActivity {
     }
 
     private void addControl(){
-        in = 0;
         tasks_gv = new ArrayList<>();
         tasks_dl = new ArrayList<>();
         tasks_kt = new ArrayList<>();
@@ -147,7 +146,10 @@ public class ProjectActivity extends AppCompatActivity {
                             }
 
                             if(finalI == listTasks.size()-1){
-                                listView.setAdapter(taskAdapter_gv);
+                                if(in == 0) listView.setAdapter(taskAdapter_gv);
+                                if(in == 1) listView.setAdapter(taskAdapter_dl);
+                                if(in == 2) listView.setAdapter(taskAdapter_kt);
+                                if(in == 3) listView.setAdapter(taskAdapter_ht);
                             }
                         }
 
@@ -244,34 +246,30 @@ public class ProjectActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Intent myIntent = null;
-                switch (in){
-                    case 0:
-                        /// mUser == leaderUser
-                        myIntent = new Intent(ProjectActivity.this, GiveTaskActivity.class);
-                        break;
-                    //                    case 1:
-                    //                        myIntent = new Intent(ProjectActivity.this, DeployingTaskActivity.class);
-                    //                        myIntent.putExtra("name", tasks_dl.get(i).getName());
-                    //                        myIntent.putExtra("title", tasks_dl.get(i).getTitle());
-                    //                        myIntent.putExtra("des", tasks_dl.get(i).getDes());
-                    //                        break;
-                    //                    case 2:
-                    //                        myIntent = new Intent(ProjectActivity.this, InspectTaskActivity.class);
-                    //                        myIntent.putExtra("name", tasks_kt.get(i).getNameSu());
-                    //                        myIntent.putExtra("title", tasks_kt.get(i).getTitle());
-                    //                        myIntent.putExtra("des", tasks_kt.get(i).getDes());
-                    //                        break;
-                    //                    case 3:
-                    //                        myIntent = new Intent(ProjectActivity.this, SuccessfulTaskActivity.class);
-                    //                        myIntent.putExtra("name", tasks_ht.get(i).getNameSu());
-                    //                        myIntent.putExtra("title", tasks_ht.get(i).getTitle());
-                    //                        myIntent.putExtra("des", tasks_ht.get(i).getDes());
-                    //                        break;
-                    //                    default:
-                    //                        break;
+                if(mProject.getStatus() == 0){
+                    Intent myIntent = null;
+                    switch (in){
+                        case 0:
+                            /// mUser == leaderUser
+                            myIntent = new Intent(ProjectActivity.this, GiveTaskActivity.class);
+                            myIntent.putExtra("taskId", tasks_gv.get(i).getId());
+                            break;
+                        case 1:
+                            myIntent = new Intent(ProjectActivity.this, DeployingTaskActivity.class);
+                            myIntent.putExtra("taskId", tasks_dl.get(i).getId());
+                            break;
+                        case 2:
+                            myIntent = new Intent(ProjectActivity.this, InspectTaskActivity.class);
+                            break;
+                        case 3:
+                            myIntent = new Intent(ProjectActivity.this, SuccessfulTaskActivity.class);
+                            break;
+                        default:
+                            break;
+                    }
+                    startActivity(myIntent);
                 }
-                startActivity(myIntent);
+
             }
         });
     }

@@ -40,20 +40,20 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_marginTop="12dp"
                         android:layout_marginLeft="10dp"
-                        android:layout_marginTop="17dp"
                         android:orientation="vertical">
+
 
                         <TextView
                             android:id="@+id/tvName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:text="Chưa giao việc"
                             android:textColor="#2D2D2D"
-                            android:textSize="14sp"
-                            android:text="Người giao việc"/>
-
+                            android:textSize="17sp" />
                         <TextView
-                            android:id="@+id/tv_time"
+                            android:id="@+id/tvTime"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textSize="10sp"
@@ -61,36 +61,13 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/l_namePro"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/l_name"
-                    android:layout_marginTop="10dp"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tiêu đề công việc"
-                        android:textColor="#6C6C6C"
-                        android:textSize="12sp" />
-                    <EditText
-                        android:id="@+id/edTitle"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:ems="10"
-                        android:gravity="start|top"
-                        android:hint="Nhập tiêu đề"
-                        android:inputType="textPersonName"
-                        android:textColor="#322F2F" />
 
-                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/l_desPro"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/l_namePro"
+                    android:layout_below="@+id/l_name"
                     android:layout_marginTop="10dp"
                     android:orientation="vertical">
 
@@ -99,8 +76,17 @@
                         android:layout_height="wrap_content"
                         android:textSize="12sp"
                         android:textColor="#6C6C6C"
-                        android:text="Nội dung công việc" />
+                        android:text="Chi tiết:" />
 
+                    <EditText
+                        android:id="@+id/edTitle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="start|top"
+                        android:hint="Nhập tiêu đề"
+                        android:layout_marginLeft="10dp"
+                        android:inputType="textPersonName"
+                        android:textColor="#322F2F" />
                     <EditText
                         android:id="@+id/edDes"
                         android:layout_width="match_parent"
@@ -194,7 +180,7 @@
             android:orientation="vertical">
 
             <Button
-                android:id="@+id/btnAddTask"
+                android:id="@+id/btnGive"
                 android:layout_width="296dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"

@@ -90,9 +90,8 @@
         <ListView
             android:id="@+id/lv_conten"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"/>
 
-        </ListView>
 
         <ImageButton
             android:id="@+id/btn_add"

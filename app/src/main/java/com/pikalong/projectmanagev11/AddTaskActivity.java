@@ -40,7 +40,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 public class AddTaskActivity extends AppCompatActivity {
     ActionBar actionBar;
 
-    TextView tvName, tvMem;
+    TextView tvMem;
     EditText edTitle, edDes;
     Button btnAddTask;
 
@@ -78,7 +78,6 @@ public class AddTaskActivity extends AppCompatActivity {
         actionBar.setTitle("Tạo công việc mới");
         actionBar.setDisplayHomeAsUpEnabled(true);
 
-        tvName = findViewById(R.id.tvName);
         tvMem = findViewById(R.id.tvMem);
         edTitle = findViewById(R.id.edTitle);
         edDes = findViewById(R.id.edDes);
@@ -112,6 +111,7 @@ public class AddTaskActivity extends AppCompatActivity {
                 mProject = dataSnapshot.getValue(Project.class);
                 String usId = mProject.getUsId();
                 listMemId = stringToList(usId);
+                listMemId.add(mProject.getUid());
 
                 DatabaseReference referenceUser = firebaseDatabase.getReference("Users");
                 for (final String memId : listMemId){
@@ -181,7 +181,6 @@ public class AddTaskActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 mUser = dataSnapshot.getValue(User.class);
-                tvName.setText(mUser.getName());
             }
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
@@ -233,50 +232,66 @@ public class AddTaskActivity extends AppCompatActivity {
         }
         if (!title.equals("") && !des.equals(""))
         {
-            HashMap<String, Object> hashMap = new HashMap<>();
+            final HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("uId", user.getUid());
             hashMap.put("usId", usIdSelect);
             hashMap.put("projectId", mProject.getId());
             hashMap.put("title", title);
             hashMap.put("des", des);
-            hashMap.put("leadName", mUser.getName());
             hashMap.put("timestamp", new Timestamp(System.currentTimeMillis()).toString());
             hashMap.put("image", "https://");
             hashMap.put("files", "");
             hashMap.put("imgFiles", ""); //lấy sau
 
             if(usIdSelect.equals("")){
+                hashMap.put("leadName", "Chưa giao việc");
                 hashMap.put("status", 0);
+
+                FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                DatabaseReference reference = firebaseDatabase.getReference("Tasks");
+                String key = reference.push().getKey();
+                hashMap.put("id", key);
+                reference.child(key).setValue(hashMap);
+
+                HashMap<String, Object> hashMapPro = new HashMap<>();
+                hashMapPro.put("tasksId", mProject.getTasksId() + "|" + key);
+                DatabaseReference referencePro = firebaseDatabase.getReference("Projects");
+                referencePro.child(mProject.getId()).updateChildren(hashMapPro);
+
+                finish();
             } else {
-                hashMap.put("status", 1);
+                final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+                DatabaseReference referenceUser = firebaseDatabase.getReference("Users");
+                referenceUser.child(usIdSelect).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        String nameT = dataSnapshot.getValue(User.class).getName();
+                        hashMap.put("leadName", nameT);
+                        hashMap.put("status", 1);
+
+
+                        DatabaseReference reference = firebaseDatabase.getReference("Tasks");
+                        String key = reference.push().getKey();
+                        hashMap.put("id", key);
+                        reference.child(key).setValue(hashMap);
+
+                        HashMap<String, Object> hashMapPro = new HashMap<>();
+                        hashMapPro.put("tasksId", mProject.getTasksId() + "|" + key);
+                        DatabaseReference referencePro = firebaseDatabase.getReference("Projects");
+                        referencePro.child(mProject.getId()).updateChildren(hashMapPro);
+
+                        finish();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
             }
-
-            FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-            DatabaseReference reference = firebaseDatabase.getReference("Tasks");
-            String key = reference.push().getKey();
-            hashMap.put("id", key);
-            reference.child(key).setValue(hashMap);
-
-            HashMap<String, Object> hashMapPro = new HashMap<>();
-            hashMapPro.put("tasksId", mProject.getTasksId() + "|" + key);
-            DatabaseReference referencePro = firebaseDatabase.getReference("Projects");
-            referencePro.child(mProject.getId()).updateChildren(hashMapPro);
-
-
-//            Intent intent = new Intent(AddTaskActivity.this, ProjectActivity.class);
-//            startActivity(intent);
-            finish();
         }
 
     }
-
-
-
-
-
-
-
-
 
 
     ///////////////////////////////

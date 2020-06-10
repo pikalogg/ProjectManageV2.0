@@ -83,7 +83,6 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
     }
 
     private void addControl(){
-        inDang = true;
         projects_dang = new ArrayList<>();
         projects_da = new ArrayList<>();
         projectAdapter_dang = new ProjectAdapter(projects_dang , getApplicationContext());
@@ -145,7 +144,10 @@ public class DashboardActivity extends AppCompatActivity implements NavigationVi
                             }
 
                             if(finalI == projects.size()-1){
-                                listView.setAdapter(projectAdapter_dang);
+                                if(inDang)
+                                    listView.setAdapter(projectAdapter_dang);
+                                else
+                                    listView.setAdapter(projectAdapter_da);
                             }
                         }
                         @Override

@@ -41,16 +41,15 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="10dp"
-                        android:layout_marginTop="17dp"
+                        android:layout_marginTop="12dp"
                         android:orientation="vertical">
 
                         <TextView
-                            android:id="@+id/tvName"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:textColor="#2D2D2D"
-                            android:textSize="14sp"
-                            android:text="Người giao việc"/>
+                            android:textSize="17sp"
+                            android:text="Công việc mới"/>
 
                         <TextView
                             android:id="@+id/tv_time"
