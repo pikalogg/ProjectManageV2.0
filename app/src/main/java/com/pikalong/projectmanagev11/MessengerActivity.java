@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -155,5 +156,18 @@ public class MessengerActivity extends AppCompatActivity {
             }
         });
 
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId())
+        {
+            case android.R.id.home:
+                onBackPressed(); //nut quay lai cua dien thoai
+                return true;
+
+            default:break;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 }
