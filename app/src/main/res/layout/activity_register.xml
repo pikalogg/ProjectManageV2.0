@@ -34,6 +34,7 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:paddingTop="10dp"
+            android:layout_marginTop="70dp"
             android:paddingBottom="40dp"
             android:text="Tài khoản"
             android:textColor="#C4C4C4"

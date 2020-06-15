@@ -59,8 +59,9 @@ public class LoginActivity extends AppCompatActivity {
     }
     private void addControl(){
         actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle("Đăng nhập");
+        actionBar.hide();
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+//        actionBar.setTitle("Đăng nhập");
 
         btn_login = findViewById(R.id.btn_login);
         not_have_account = findViewById(R.id.not_have_account);

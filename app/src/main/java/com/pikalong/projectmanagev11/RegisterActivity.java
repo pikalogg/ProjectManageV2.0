@@ -53,8 +53,9 @@ public class RegisterActivity extends AppCompatActivity {
     }
     private void addControl(){
         actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setTitle("Đăng ký");
+        actionBar.hide();
+//        actionBar.setDisplayHomeAsUpEnabled(true);
+//        actionBar.setTitle("Đăng ký");
 
 
         nameEd = findViewById(R.id.nameEd);
