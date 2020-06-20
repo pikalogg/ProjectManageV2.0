@@ -279,7 +279,7 @@ public class ProjectActivity extends AppCompatActivity {
                         } else {
                             startActivity(myIntent);
                         }
-                    } else if (in ==2 ){
+                    } else if (in == 2 ){
                         myIntent = new Intent(ProjectActivity.this, InspectTaskActivity.class);
                         myIntent.putExtra("taskId", tasks_kt.get(i).getId());
                         startActivity(myIntent);
