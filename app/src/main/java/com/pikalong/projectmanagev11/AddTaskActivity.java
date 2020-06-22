@@ -104,29 +104,33 @@ public class AddTaskActivity extends AppCompatActivity {
         user = FirebaseAuth.getInstance().getCurrentUser();
 
         firebaseDatabase = FirebaseDatabase.getInstance();
-        reference = firebaseDatabase.getReference("Projects").child(mIntent.getStringExtra("projectId"));
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+        reference = firebaseDatabase.getReference("Projects");
+        reference.child(mIntent.getStringExtra("projectId")).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 mProject = dataSnapshot.getValue(Project.class);
                 String usId = mProject.getUsId();
                 listMemId = stringToList(usId);
                 listMemId.add(mProject.getUid());
+                for (String ttt : listMemId) listMem.add(ttt);
 
                 DatabaseReference referenceUser = firebaseDatabase.getReference("Users");
-                for (final String memId : listMemId){
+                for (int i = 0; i < listMemId.size(); i++){
+                    String memId = listMemId.get(i);
+                    final int finalI = i;
                     referenceUser.child(memId).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             User tmpUser = dataSnapshot.getValue(User.class);
-//                            Toast.makeText(getBaseContext(), tmpUser.getName(), Toast.LENGTH_LONG).show();
-                            listMem.add(tmpUser.getName());
+                            listMem.set(finalI,tmpUser.getName());
                             adapter.notifyDataSetChanged();
                         }
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
 
                         }
+
+
                     });
                 }
             }
@@ -155,6 +159,7 @@ public class AddTaskActivity extends AppCompatActivity {
         btnAddTask.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 addTask();
             }
         });
@@ -175,7 +180,6 @@ public class AddTaskActivity extends AppCompatActivity {
 
     private  void addData(){
         String uid = user.getUid();
-        final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         DatabaseReference reference = firebaseDatabase.getReference("Users");
         reference.child(uid).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -260,7 +264,6 @@ public class AddTaskActivity extends AppCompatActivity {
 
                 finish();
             } else {
-                final FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
                 DatabaseReference referenceUser = firebaseDatabase.getReference("Users");
                 referenceUser.child(usIdSelect).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override

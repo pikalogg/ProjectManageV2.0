@@ -162,6 +162,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
     private void loginUser(String email, String pass){
+        sweetAlertDialog.setTitleText("Đang đăng nhập\nHãy chờ...");
         sweetAlertDialog.show();
         firebaseAuth.signInWithEmailAndPassword(email, pass)
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {

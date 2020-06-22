@@ -128,7 +128,6 @@ public class GiveTaskActivity extends AppCompatActivity {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     User tmpUser = dataSnapshot.getValue(User.class);
-//                            Toast.makeText(getBaseContext(), tmpUser.getName(), Toast.LENGTH_LONG).show();
                                     listMem.add(tmpUser.getName());
                                     adapter.notifyDataSetChanged();
                                 }
@@ -174,6 +173,7 @@ public class GiveTaskActivity extends AppCompatActivity {
         btnGive.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 giveTask();
             }
         });

@@ -401,7 +401,7 @@ public class AddProjectActivity extends AppCompatActivity {
             edNamePro.setFocusable(true);
             return;
         }
-        sweetAlertDialog.setTitle("Đang tạo project");
+        sweetAlertDialog.setTitle("Đang tạo dự án mới");
         sweetAlertDialog.setContentText("Hãy chờ...");
         sweetAlertDialog.show();
 
